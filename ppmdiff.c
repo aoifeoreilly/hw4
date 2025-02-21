@@ -130,8 +130,7 @@ int get_denominator(Pnm_ppm image1, Pnm_ppm image2)
 {
         int height = 0;
         int width = 0;
-        printf("abs1: %d\n", abs((int)image1->height - (int)image2->height));
-        if (abs((int)(image1->height - image2->height)) > 1) {
+        if (abs((int)image1->height - (int)image2->height) > 1) {
                 fprintf(stderr, "HEIGHTS ARE DIFFERENT\n");
                 printf("1.0\n");
                 return -1;
@@ -144,7 +143,7 @@ int get_denominator(Pnm_ppm image1, Pnm_ppm image2)
                 }   
         }
 
-        if (((int)image1->width - (int)image2->width) > 1) {
+        if (abs((int)image1->width - (int)image2->width) > 1) {
                 fprintf(stderr, "WIDTHS ARE DIFFERENT\n");
                 printf("1.0\n");
                 return -1;
@@ -156,7 +155,13 @@ int get_denominator(Pnm_ppm image1, Pnm_ppm image2)
                         width = image1->width;
                 }   
         }
-
+        for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                        Pnm_rgb pixel1 = (Pnm_rgb)methods->at(image1->pixels, j, i);
+                        Pnm_rgb pixel2 = (Pnm_rgb)methods->at(image2->pixels, j, i);
+                        
+                }
+        }
         printf("width: %d\n", width);
         printf("height: %d\n", height);
         (void)width;
