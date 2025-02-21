@@ -21,7 +21,9 @@
 #include "a2plain.h"
 
 static FILE *openFile(char *fname, char *mode);
-int get_denominator(Pnm_ppm image1, Pnm_ppm image2);
+double find_rms(Pnm_ppm image1, Pnm_ppm image2);
+void checkBorders(Pnm_ppm image1, Pnm_ppm image2, int *height, int *width, 
+                                                        double *denominator);
 
 /********** main ********
  *
@@ -74,8 +76,8 @@ int main(int argc, char *argv[])
         
         Pnm_ppm ppm1 = Pnm_ppmread(fptr1, methods);
         Pnm_ppm ppm2 = Pnm_ppmread(fptr2, methods);
-        int variance = get_denominator(ppm1, ppm2);
-        (void)variance;
+        double rms = find_rms(ppm1, ppm2);
+        printf("RMS: %f\n", rms);
         
         Pnm_ppmfree(&ppm1);
         Pnm_ppmfree(&ppm2);
@@ -110,7 +112,7 @@ static FILE *openFile(char *fname, char *mode)
         return fp;
 }
 
-/********** get_denominator ********
+/********** find_rms ********
  *
  * 
  *
@@ -126,49 +128,72 @@ static FILE *openFile(char *fname, char *mode)
  * Notes:
  *      
  ************************/
-int get_denominator(Pnm_ppm image1, Pnm_ppm image2)
+double find_rms(Pnm_ppm image1, Pnm_ppm image2)
 {
         int height = 0;
         int width = 0;
+        double denominator = 0;
+        checkBorders(image1, image2, &height, &width, &denominator);
+        double sum = 0;
+        for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                        Pnm_rgb pixel1 = image1->methods->at(image1->pixels, 
+                                                                        j, i);
+                        Pnm_rgb pixel2 = image2->methods->at(image2->pixels, 
+                                                                        j, i);
+                        
+                        double diff_red = ((double)pixel1->red - 
+                                (double)pixel2->red) / denominator;
+
+                        double diff_green = ((double)pixel1->green - 
+                                (double)pixel2->green) / denominator;
+
+                        double diff_blue = ((double)pixel1->blue - 
+                                (double)pixel2->blue) / denominator;
+
+                        
+                        sum += (diff_red * diff_red) 
+                             + (diff_green * diff_green) 
+                             + (diff_blue * diff_blue);
+                }
+        }
+        
+        double mean = sum / (3 * width * height);
+        double rms = sqrt(mean);
+
+        return rms;
+        
+}
+
+
+void checkBorders(Pnm_ppm image1, Pnm_ppm image2, int *height, int *width, 
+                                                  double *denominator) 
+{
+        *denominator = image1->denominator;
+        assert(*denominator == image2->denominator);
         if (abs((int)image1->height - (int)image2->height) > 1) {
                 fprintf(stderr, "HEIGHTS ARE DIFFERENT\n");
                 printf("1.0\n");
-                return -1;
+                exit(1);
         } else {
-                /* Take the smaller of the heights */
                 if(image1->height > image2->height) {
-                        height = image2->height;
+                        *height = image2->height;
                 } else {
-                        height = image1->height;
+                        *height = image1->height;
                 }   
         }
 
         if (abs((int)image1->width - (int)image2->width) > 1) {
                 fprintf(stderr, "WIDTHS ARE DIFFERENT\n");
                 printf("1.0\n");
-                return -1;
+                exit(1);
         } else {
-                /* Take the smaller of the widths */
                 if (image1->width > image2->width) {
-                        width = image2->width;
+                        *width = image2->width;
                 } else {
-                        width = image1->width;
+                        *width = image1->width;
                 }   
         }
-        for (int i = 0; i < height; i++) {
-                for (int j = 0; j < width; j++) {
-                        Pnm_rgb pixel1 = (Pnm_rgb)methods->at(image1->pixels, j, i);
-                        Pnm_rgb pixel2 = (Pnm_rgb)methods->at(image2->pixels, j, i);
-                        
-                }
-        }
-        printf("width: %d\n", width);
-        printf("height: %d\n", height);
-        (void)width;
-        (void)height;
-        return -1;
-        
 }
-
-        
+    
 
