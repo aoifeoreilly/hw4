@@ -15,12 +15,10 @@ IFLAGS = -I/comp/40/build/include -I/usr/sup/cii40/include/cii
 CFLAGS = -g -std=gnu99 -Wall -Wextra -Werror -Wfatal-errors -pedantic $(IFLAGS)
 
 # Linking flags
-# LDFLAGS = -g -L/comp/40/build/lib -L/usr/sup/cii40/lib64
-LDFLAGS = -g -L/comp/40/build/lib -larith40
+LDFLAGS = -g -L/comp/40/build/lib -L/usr/sup/cii40/lib64
 
 # Libraries needed for linking
-# LDLIBS = -l40locality -lnetpbm -lcii40 -lm -lrt
-LDLIBS = -lnetpbm -lcii40 -lm -lrt
+LDLIBS = -l40locality -larith40 -lnetpbm -lcii40 -lm -lrt
 
 # Collect all .h files in your directory.
 # This way, you can never forget to add
@@ -34,8 +32,7 @@ INCLUDES = $(shell echo *.h)
 
 ############### Rules ###############
 
-all: ppmdiff
-
+all: ppmdiff 40image
 
 ## Compile step (.c files -> .o files)
 
@@ -49,15 +46,12 @@ all: ppmdiff
 ppmdiff: ppmdiff.o a2plain.o uarray2.o
 	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS)
 
-# timing_test: timing_test.o cputiming.o
-# 	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS) 
+40image: 40image.o compress_decompress.o uarray2b.o uarray2.o trimPPM.o
+	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS) 
 
-# ppmtrans: ppmtrans.o cputiming.o a2plain.o a2blocked.o uarray2.o uarray2b.o
-# 	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS)
-
-unit_tests: unit_tests.o uarray2b.o uarray2.o
+unit_tests: unit_tests.o uarray2b.o uarray2.o compress_decompress.o trimPPM.o
 	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS)
 
 clean:
-	rm -f ppmtrans a2test timing_test *.o
+	rm -f ppmdiff 40image *.o
 

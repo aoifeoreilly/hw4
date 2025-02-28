@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
         FILE *fptr1 = NULL;
         FILE *fptr2 = NULL;
 
-        assert(argc > 1 && argc < 4);
+        assert(argc == 3);
         assert(strcmp(argv[1], "-") != 0 || strcmp(argv[2], "-") != 0);
 
         /* First argument to be read on stdin */
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
  * Notes:
  *      Will CRE if any expectation is violated.
  ************************/
-static FILE *openFile(char *fname, char *mode)
+FILE *openFile(char *fname, char *mode)
 {
         assert(fname != NULL && mode != NULL);
         FILE *fp = fopen(fname, mode);
