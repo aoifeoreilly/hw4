@@ -40,34 +40,39 @@ struct CompVidPixel {
         float Pr;
 };
 
-/********** RGBtoCVS_Closure ********
+/********** RGB_CVS_Closure ********
  *
- * This structure represents a component video color space pixel.
+ * 
  *
  * Elements:
- *      A2Methods_T trimmed_image : trimmed array containing RGB pixels
- *      unsigned denominator      : the maximum value of the given ppm_image
+ *      A2Methods_T image    : For compression   - image represents the trimmed 
+ *                                           array containing RGB pixels
+ *                             For decompression - image represents the CVS 
+ *                                           array containing CompVidPixels
+ *      unsigned denominator : the maximum value of the image 
  * 
  ************************/
-struct RGBtoCVS_Closure {
-        A2Methods_T trimmed_image;
+struct RGB_CVS_Closure {
+        A2Methods_UArray2 image;
+        A2Methods_T methods;
         unsigned denominator;
 };
-
 
 /******************************************
  *             COMPRESSION 
 *******************************************/
-A2Methods_T rgbToCompVid(A2Methods_T trimmed_image, unsigned denominator);
+A2Methods_UArray2 rgbToCompVid(A2Methods_UArray2 trimmed_image, 
+                               A2Methods_T methods, 
+                                unsigned denominator);
 void rgbToCompVidApply(int col, int row, A2Methods_Object *array2d, void *elem, 
                        void *cl);
 
 /******************************************
  *             DECOMPRESSION
 *******************************************/
-Pnm_ppm CompVidtoRGB(A2Methods_T comp_vid_image, unsigned denominator);
-void CompVidtoRGBApply(int col, int row, A2Methods_Object *array2b, void *elem, 
+Pnm_ppm CompVidtoRGB(A2Methods_UArray2 CVS_image, 
+                                A2Methods_T methods, unsigned denominator);
+void CompVidtoRGBApply(int col, int row, A2Methods_Object *array2d, void *elem, 
                        void *cl);
-void calculateRGB(float Y, float Pb_avg, float Pr_avg, unsigned denominator);
 
 #endif
