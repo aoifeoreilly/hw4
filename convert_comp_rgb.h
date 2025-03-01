@@ -8,13 +8,13 @@
  *
  *     
  *
- ************************/
+ *************************************************************/
 
 #ifndef CONVERT_COMP_RGB_H
 #define CONVERT_COMP_RGB_H
 
 #include <stdio.h>
-#include "compress40.h"
+#include <stdlib.h>
 #include "pnm.h"
 #include "assert.h"
 #include "a2methods.h"
@@ -24,11 +24,50 @@
 #include "compress_decompress.h"
 #include "trimPPM.h"
 
-void rgbToCompVid(UArray2b_T comp_vid_image, Pnm_ppm ppm_image);
-void rgbToCompVidApply(int col, int row, A2Methods_Object *array2b, void *elem, 
+/********** CompVidPixel ********
+ *
+ * This structure represents a component video color space pixel.
+ *
+ * Elements:
+ *      float Y  : represents the brightness of a color
+ *      float Pb : color-difference signal proportional to Blue − Yellow
+ *      float Pr : color-difference signal proportional to Red − Yellow
+ * 
+ ************************/
+struct CompVidPixel {
+        float Y;
+        float Pb;
+        float Pr;
+};
+
+/********** RGBtoCVS_Closure ********
+ *
+ * This structure represents a component video color space pixel.
+ *
+ * Elements:
+ *      A2Methods_T trimmed_image : trimmed array containing RGB pixels
+ *      unsigned denominator      : the maximum value of the given ppm_image
+ * 
+ ************************/
+struct RGBtoCVS_Closure {
+        A2Methods_T trimmed_image;
+        unsigned denominator;
+};
+
+
+/******************************************
+ *             COMPRESSION 
+*******************************************/
+A2Methods_T rgbToCompVid(A2Methods_T trimmed_image, unsigned denominator);
+void rgbToCompVidApply(int col, int row, A2Methods_Object *array2d, void *elem, 
                        void *cl);
-void CompVidtoRGB(UArray2b_T comp_vid_image, Pnm_ppm ppm_image);
+
+/******************************************
+ *             DECOMPRESSION
+*******************************************/
+Pnm_ppm CompVidtoRGB(A2Methods_T comp_vid_image, unsigned denominator);
 void CompVidtoRGBApply(int col, int row, A2Methods_Object *array2b, void *elem, 
                        void *cl);
+void calculateRGB(float Y, float Pb_avg, float Pr_avg, unsigned denominator);
 
 #endif

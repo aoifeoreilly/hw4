@@ -6,93 +6,126 @@
  *      Edited by:  Aoife O'Reilly (aoreil02) and Griffin Faecher (gfaech01)
  *      Date:       2/28/2025
  *
- *      
+ *      TODO
  *
  **********************************************************/
 
 #include "convert_comp_rgb.h"
 
-struct CompVidClosure {
-        UArray2b_T comp_vid_image;
-        int denominator;
-};
-
-struct AverageCompVidPixel {
-        float Y1, Y2, Y3, Y4;
-        float Pb_avg, Pr_avg;
-};
-
-struct RGBClosure {
-        UArray2b_T comp_vid_image;
-        int denominator;
-};
-
-void rgbToCompVid(UArray2b_T comp_vid_image, Pnm_ppm ppm_image) 
+/********** rgbToCompVid ********
+ *
+ * Transforms each pixel in the given array from RGB color space to component 
+ * video color space.
+ *
+ * Parameters:
+ *      A2Methods_T trimmed_image : trimmed array containing RGB pixels
+ *      unsigned denominator      : the maximum value of the given ppm_image
+ * 
+ * Return:
+ *      A2Methods_T: The array with all of its pixels in component video 
+ *                   color space.
+ *
+ * Expects:
+ *      TODO
+ *
+ * Notes:
+ *      Converts unsigned values to a floating-point representation.
+ *     
+ ************************/
+A2Methods_T rgbToCompVid(A2Methods_T trimmed_image, unsigned denominator) 
 {
-        struct CompVidClosure cl = {
-                comp_vid_image, 
-                ppm_image->denominator
+        /* cl struct to pass trimmed image & denominator into apply function */
+        struct RGBtoCVS_Closure cl = {
+                trimmed_image, 
+                denominator
         };
 
-        ppm_image->methods->map_default(ppm_image->pixels, rgbToCompVidApply, 
-                                        &cl);
-                                        
-        (void)comp_vid_image;
-        (void)ppm_image;
+        /* Create blocked 2D array of memory cells, each of size CompVidPixel */
+        A2Methods_T CVS_image = trimmed_image->new_with_blocksize(
+                                        trimmed_image->width(trimmed_image), 
+                                        trimmed_image->height(trimmed_image), 
+                                        sizeof(struct CompVidPixel *),
+                                        2);
 
+        /* Visit every cell in CVS_image and call the apply function */
+        CVS_image->map_default(CVS_image, rgbToCompVidApply, &cl);
+        return CVS_image;
+                                        
 }
 
-void rgbToCompVidApply(int col, int row, A2Methods_Object *array2b, void *elem, 
+void rgbToCompVidApply(int col, int row, A2Methods_Object *array2d, void *elem, 
                        void *cl)
 {
-        (void)array2b;
-        
-        Pnm_rgb rgb_pixel = elem;
-        struct CompVidClosure *CV_cl = cl;
-        UArray2b_T comp_vid_image = CV_cl->comp_vid_image;
-        int denominator = CV_cl->denominator;
+        (void)array2d;
 
-        /* Make a component video pixel instance from our new image */
-        struct CompVidPixel *comp_vid_pixel = UArray2b_at(comp_vid_image, 
-                                                          col, row);
-        
-        float red_float = rgb_pixel->red / denominator;
-        float green_float = rgb_pixel->green / denominator;
-        float blue_float = rgb_pixel->blue / denominator;
+        /* Get the current CVS pixel (struct containing Y, Pb, Pr) */
+        struct CompVidPixel *curr_CVS_pixel = elem;
+
+        /* Extract trimmed image and denominator from closure */
+        struct RGBtoCVS_Closure *closure = cl;
+        A2Methods_T trimmed_image = closure->trimmed_image;
+        unsigned denominator = closure->denominator;
+
+        /* Get each RGB pixel from the trimmed image */
+        Pnm_rgb curr_RGB_pixel = trimmed_image->at(trimmed_image, col, row);
+
+        /* Convert to RGB values to floats */
+        float red_float = curr_RGB_pixel->red / denominator;
+        float green_float = curr_RGB_pixel->green / denominator;
+        float blue_float = curr_RGB_pixel->blue / denominator;
 
         /* Calculate values for Y, Pb, and Pr */
-        comp_vid_pixel->Y = (0.299 * red_float) + 
+        curr_CVS_pixel->Y = (0.299 * red_float) + 
                             (0.587 * green_float) + 
                             (0.114 * blue_float);
-        comp_vid_pixel->Pb = (-0.168736 * red_float) - 
+        curr_CVS_pixel->Pb = (-0.168736 * red_float) - 
                              (0.331264 * green_float) + 
                              (0.5 * blue_float);
-        comp_vid_pixel->Pr = (0.5 * red_float) - 
+        curr_CVS_pixel->Pr = (0.5 * red_float) - 
                              (0.418688 * green_float) - 
                              (0.081312 * blue_float);
 
-        /* QUESTION: what happens if these values are out of range, what should
-        we do? */
-        assert(comp_vid_pixel->Y <= 1.0 &&  comp_vid_pixel->Y >= 0.0);
-        assert(comp_vid_pixel->Pb <= 0.5 &&  comp_vid_pixel->Pb >= -0.5);
-        assert(comp_vid_pixel->Pr <= 0.5 &&  comp_vid_pixel->Pr >= -0.5);
+        /* Clamp Y, Pb, and Pr so that they remain in bounds (lossy step) */
+        if (curr_CVS_pixel->Pb < -0.5) {
+                curr_CVS_pixel->Pb = -0.5;
+        } else if (curr_CVS_pixel->Pb > 0.5){
+                curr_CVS_pixel->Pb = 0.5;
+        }
+        
+        if (curr_CVS_pixel->Pr < -0.5) {
+                curr_CVS_pixel->Pr = -0.5;
+        } else if (curr_CVS_pixel->Pr > 0.5){
+                curr_CVS_pixel->Pr = 0.5;
+        }
 
-        /* TODO: add logic to get Y1, Y2, Y3, Y4 */
+        if (curr_CVS_pixel->Y < 0) {
+                curr_CVS_pixel->Y = 0;
+        } else if (curr_CVS_pixel->Y > 1) {
+                curr_CVS_pixel->Y = 1;
+        }
 }
 
-void CompVidtoRGB(UArray2b_T comp_vid_image, Pnm_ppm ppm_image)
+
+Pnm_ppm CompVidtoRGB(A2Methods_T CVS_image, unsigned denominator)
 {
-        // struct CompVidClosure cl = {
-        //         ppm_image, 
-        //         ppm_image->denominator
-        // };
-
-
         
-        ppm_image->methods->map_default(ppm_image->pixels, CompVidtoRGBApply, 
+        struct Pnm_ppm ppm_image = {
+                CVS_image->width(CVS_image),
+                CVS_image->height(CVS_image),
+                denominator,
+                CVS_image->new_with_blocksize(CVS_image->width(CVS_image), 
+                                              CVS_image->height(CVS_image), 
+                                              sizeof(struct Pnm_rgb *), 
+                                              2),
+                CVS_image
+        };
+
+        /* Visit every cell in the ppm_image pixmap and call apply function */
+        ppm_image.methods->map_default(ppm_image.pixels, CompVidtoRGBApply, 
                                         &ppm_image);
 
-
+        
+        return ppm_image;
 } 
 
 void CompVidtoRGBApply(int col, int row, A2Methods_Object *array2b, void *elem, 
@@ -106,79 +139,28 @@ void CompVidtoRGBApply(int col, int row, A2Methods_Object *array2b, void *elem,
         float Y2_float = avg_comp_vid_pixel->Y2;
         float Y3_float = avg_comp_vid_pixel->Y3;
         float Y4_float = avg_comp_vid_pixel->Y4;
-        float Pb_float = avg_comp_vid_pixel->Pb;
-        float Pr_float = avg_comp_vid_pixel->Pr;
+        float Pb_avg = avg_comp_vid_pixel->Pb;
+        float Pr_avg = avg_comp_vid_pixel->Pr;
+        
+        unsigned denominator = ppm_image->denominator;
 
-        unsigned r1 = (unsigned)(((1.0 * Y1_float) + 
-                                  (0.0 * Pb_float) + 
-                                  (1.402 * Pr_float)) *
-                                  ppm_image->denominator);
-        unsigned g1 = (unsigned)(((1.0 * Y1_float) + 
-                                  (0.344136 * Pb_float) + 
-                                  (0.714136 * Pr_float)) *
-                                  ppm_image->denominator);
-        unsigned b1 = (unsigned)(((1.0 * Y1_float) + 
-                                  (1.772 * Pb_float) + 
-                                  (0.0 * Pr_float)) *
-                                  ppm_image->denominator);
+        calculateRGB(avg_comp_vid_pixel->Y1, Pb_avg, Pr_avg, denominator);
+        calculateRGB(avg_comp_vid_pixel->Y2, Pb_avg, Pr_avg, denominator);
+        calculateRGB(avg_comp_vid_pixel->Y3, Pb_avg, Pr_avg, denominator);
+        calculateRGB(avg_comp_vid_pixel->Y4, Pb_avg, Pr_avg, denominator);
+}
 
-        unsigned r2 = (unsigned)(((1.0 * Y2_float) + 
-                                  (0.0 * Pb_float) + 
-                                  (1.402 * Pr_float)) *
-                                  ppm_image->denominator);
-        unsigned g2 = (unsigned)(((1.0 * Y2_float) + 
-                                  (0.344136 * Pb_float) + 
-                                  (0.714136 * Pr_float)) *
-                                  ppm_image->denominator);
-        unsigned b2 = (unsigned)(((1.0 * Y2_float) + 
-                                  (1.772 * Pb_float) + 
-                                  (0.0 * Pr_float)) *
-                                  ppm_image->denominator);
 
-        unsigned r3 = (unsigned)(((1.0 * Y3_float) + 
-                                  (0.0 * Pb_float) + 
-                                  (1.402 * Pr_float)) *
-                                  ppm_image->denominator);
-        unsigned g3 = (unsigned)(((1.0 * Y3_float) + 
-                                  (0.344136 * Pb_float) + 
-                                  (0.714136 * Pr_float)) *
-                                  ppm_image->denominator);
-        unsigned b3 = (unsigned)(((1.0 * Y3_float) + 
-                                  (1.772 * Pb_float) + 
-                                  (0.0 * Pr_float)) *
-                                  ppm_image->denominator);
+void calculateRGB(float Y, float Pb_avg, float Pr_avg, unsigned denominator)
+{
+        unsigned r = (unsigned)(((1.0 * Y) + (0.0 * Pb_avg) + 
+                                 (1.402 * Pr_avg)) * denominator);
 
-        unsigned r4 = (unsigned)(((1.0 * Y4_float) + 
-                                  (0.0 * Pb_float) + 
-                                  (1.402 * Pr_float)) * 
-                                  ppm_image->denominator);
-        unsigned g4 = (unsigned)(((1.0 * Y4_float) - 
-                                  (0.344136 * Pb_float) -
-                                  (0.714136 * Pr_float)) *
-                                  ppm_image->denominator);
-        unsigned b4 = (unsigned)(((1.0 * Y4_float) + 
-                                  (1.772 * Pb_float) + 
-                                  (0.0 * Pr_float)) *
-                                  ppm_image->denominator);
-        /* QUESTION: How to take average image data spread across 4 pixel in ppm
-        */
-        for (int i = 0; i < ppm_image->methods->blocksize(ppm_image->pixels); i++) {
-                for (int j = 0; j < ppm_image->methods->blocksize(ppm_image->pixels); j++) {
-                        Pnm_rgb rgb_pixel = ppm_image->methods->at(ppm_image->pixels, 
-                                                                   col + i, row + j);
-                        rgb_pixel->red = (unsigned)(((1.0 * Y1_float) + 
-                                  (0.0 * Pb_float) + 
-                                  (1.402 * Pr_float)) *
-                                  ppm_image->denominator);
-                        rgb_pixel->green = (unsigned)(((1.0 * Y1_float) + 
-                                  (0.344136 * Pb_float) + 
-                                  (0.714136 * Pr_float)) *
-                                  ppm_image->denominator);
-                        rgb_pixel->blue = (unsigned)(((1.0 * Y1_float) + 
-                                  (1.772 * Pb_float) + 
-                                  (0.0 * Pr_float)) *
-                                  ppm_image->denominator);
+        unsigned g = (unsigned)(((1.0 * Y) + (0.344136 * Pb_avg) + 
+                                 (0.714136 * Pr_avg)) * denominator);
 
-                }
-        }
+        unsigned b = (unsigned)(((1.0 * Y) + (1.772 * Pb_avg) + 
+                                 (0.0 * Pr_avg)) * denominator);                          
+        
+
 }

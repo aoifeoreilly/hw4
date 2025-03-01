@@ -11,6 +11,7 @@
  **********************************************************/
 
 #include "compress_decompress.h"
+#define DENOMINATOR 255
 
 /********** compression ********
  *
@@ -43,10 +44,12 @@ void compress40(FILE *input)
 
         /* Compression Step #2: Allocate UArray2b_T for image with trimmed 
                                 dimensions in component video color space */
-        UArray2b_T comp_vid_image = trimPPM(ppm_image);
+        A2Methods_T trimmed_image = trimPPM(ppm_image);
+        (void)trimmed_image;
 
         /* Compression Step #3: Convert RGB values to comp video color format */
-        rgbToCompVid(comp_vid_image, ppm_image);
+        A2Methods_T CVS_image = rgbToCompVid(trimmed_image, ppm_image->denominator);
+        (void)CVS_image;
 
         
 }
@@ -69,16 +72,22 @@ void compress40(FILE *input)
  ************************/
 void decompress40(FILE *input)
 {      
+        (void)input;
         assert(input != NULL);  
+        
+        /* Use UArray2 blocked methods */
         A2Methods_T methods = uarray2_methods_blocked;
         assert(methods != NULL);
-        //UArray2b_T comp_vid_image = methods->new(0, 0, sizeof(struct CompVidPixel *), 2);       
-        CompVidtoRGB(comp_vid_image, ppm_image);  
+        
+        A2Methods_T CVS_image = methods->new_with_blocksize(0, 0, 
+                                             sizeof(struct CompVidPixel *), 
+                                             2);    
+
+        CompVidtoRGB(CVS_image, DENOMINATOR);  
         
         
-        Pnm_ppm final_ppm = NULL;
-        Pnm_ppmwrite(stdout, final_ppm);
-        
+        // Pnm_ppm final_ppm = NULL;
+        // Pnm_ppmwrite(stdout, final_ppm);
         
         
 }
