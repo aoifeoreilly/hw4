@@ -97,7 +97,7 @@ void trimPPM_test()
     assert(ppm_image != NULL);
     fclose(input);
 
-    UArray2b_T comp_vid_image = trimPPM(ppm_image);
+    A2Methods_T comp_vid_image = trimPPM(ppm_image);
     assert(comp_vid_image != NULL);
 
     /* Check that the dimensions are now even */
