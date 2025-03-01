@@ -112,6 +112,40 @@ void trimPPM_test()
     Pnm_ppmfree(&ppm_image);
 }
 
+void rgbToCompVid_test()
+{
+        FILE *input = fopen("test_files/valid.ppm", "r");
+        A2Methods_T methods = uarray2_methods_blocked;
+        Pnm_ppm ppm_image = Pnm_ppmread(input, methods);
+        assert(ppm_image != NULL);
+        fclose(input);
+
+        /* Create an array to hold the component video data */
+        UArray2b_T comp_vid_image = UArray2b_new(ppm_image->width, 
+                                                ppm_image->height, 
+                                                sizeof(struct CompVidPixel), 2);
+        assert(comp_vid_image != NULL);
+
+        /* Perform the RGB to Component Video conversion */
+        rgbToCompVid(comp_vid_image, ppm_image);
+
+        /* Validate the results */
+        for (unsigned row = 0; row < ppm_image->height; row++) {
+                for (unsigned col = 0; col < ppm_image->width; col++) {
+                        struct CompVidPixel *pixel = 
+                                        UArray2b_at(comp_vid_image, col, row);
+                        assert(pixel->Y >= 0.0 && pixel->Y <= 1.0);
+                        assert(pixel->Pb >= -0.5 && pixel->Pb <= 0.5);
+                        assert(pixel->Pr >= -0.5 && pixel->Pr <= 0.5);
+                }
+        }
+
+        printf("Success: %s\n", __func__);
+
+        UArray2b_free(&comp_vid_image);
+        Pnm_ppmfree(&ppm_image);
+}
+
 /*****************************************************************
  *                      Decompression Tests
  *****************************************************************/
@@ -131,5 +165,6 @@ int main()
         compress_valid_file_test();
         compress_null_file_test();
         trimPPM_test();
+        rgbToCompVid_test();
         return 0;
 }

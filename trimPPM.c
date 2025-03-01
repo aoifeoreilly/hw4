@@ -12,22 +12,6 @@
 
 #include "trimPPM.h"
 
-/********** UArray2_T ********
- *
- * This structure represents a component video color space pixel.
- *
- * Elements:
- *      float Y  : represents the brightness of a color
- *      float Pb : color-difference signal proportional to Blue − Yellow
- *      float Pr : color-difference signal proportional to Red − Yellow
- * 
- ************************/
-struct CompVidPixel {
-        float Y;
-        float Pb;
-        float Pr;
-};
-
 /********** trimPPM ********
  *
  * 
@@ -68,7 +52,7 @@ UArray2b_T trimPPM(Pnm_ppm ppm_image)
         /* Allocate 2D blocked array with new dimensions and element size */
         UArray2b_T comp_vid_image = UArray2b_new(width, 
                                                  height, 
-                                                 sizeof(float) * 3,
+                                                 sizeof(struct CompVidPixel *),
                                                  2);
 
         /* Loop through every pixel in the ppm_image and initialize the 

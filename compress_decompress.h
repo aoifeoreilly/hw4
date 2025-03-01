@@ -10,6 +10,9 @@
  *
  **********************************************************/
 
+#ifndef COMPRESS_DECOMPRESS_H
+#define COMPRESS_DECOMPRESS_H
+
 #include <stdio.h>
 #include "pnm.h"
 #include "a2methods.h"
@@ -17,6 +20,9 @@
 #include "a2blocked.h"
 #include "assert.h"
 #include "trimPPM.h"
+#include "convert_comp_rgb.h"
 
 void compress40(FILE *input);
 void decompress40(FILE *input);
+
+#endif
