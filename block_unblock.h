@@ -23,7 +23,31 @@
 #include "uarray2.h"
 #include "compress_decompress.h"
 #include "trimPPM.h"
+#include "convert_comp_rgb.h"
+#define BLOCKSIZE 2
 
-void calculateRGB(float Y, float Pb_avg, float Pr_avg, unsigned denominator);
+/********** AveragePixel ********
+ *
+ * 
+ *
+ * Elements:
+ *      float Y1, Y2, Y3, Y4 : 
+ *      float Pr_avg, Pb_avg :
+ * 
+ ************************/
+struct AveragePixel {
+        float Y1, Y2, Y3, Y4;
+        float Pr_avg, Pb_avg;
+};
+
+/******************************************
+ *             COMPRESSION 
+*******************************************/
+UArray2b_T average4to1(UArray2b_T CVS_image, A2Methods_T methods);
+void average4to1Apply(int col, int row, UArray2b_T averageBlock, void *elm, void *cl);
+
+/******************************************
+ *             DECOMPRESSION
+*******************************************/
 
 #endif

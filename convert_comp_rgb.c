@@ -32,26 +32,24 @@
  *      Converts unsigned values to a floating-point representation.
  *     
  ************************/
-A2Methods_UArray2 rgbToCompVid(A2Methods_UArray2 trimmed_image, 
-                                A2Methods_T methods, unsigned denominator) 
+UArray2b_T rgbToCompVid(UArray2b_T trimmed_image, unsigned denominator) 
 {
         assert(trimmed_image != NULL);
 
         /* cl struct to pass trimmed image & denominator into apply function */
         struct RGB_CVS_Closure cl = {
                 trimmed_image,
-                methods, 
                 denominator
         };
+        
 
-        A2Methods_T CVS_image = methods->new_with_blocksize(
-                                        methods->width(trimmed_image), 
-                                        methods->height(trimmed_image), 
-                                        sizeof(struct CompVidPixel *),
+        UArray2b_T CVS_image = UArray2b_new(UArray2b_width(trimmed_image),
+                                        UArray2b_height(trimmed_image), 
+                                        sizeof(struct CompVidPixel),
                                         2);
         
         /* Visit every cell in CVS_image and call the apply function */
-        methods->map_default(CVS_image, rgbToCompVidApply, &cl);
+        UArray2b_map(CVS_image, rgbToCompVidApply, &cl);
         return CVS_image;
                                         
 }
@@ -77,28 +75,26 @@ A2Methods_UArray2 rgbToCompVid(A2Methods_UArray2 trimmed_image,
  * Notes:
  *     
  ************************/
-void rgbToCompVidApply(int col, int row, A2Methods_Object *array2d, void *elem, 
+void rgbToCompVidApply(int col, int row, UArray2b_T array2b, void *elem, 
                        void *cl)
 {
-        (void)array2d;
+        (void)array2b;
 
         /* Get the current CVS pixel (struct containing Y, Pb, Pr) */
         struct CompVidPixel *curr_CVS_pixel = elem;
 
         /* Extract trimmed image and denominator from closure */
         struct RGB_CVS_Closure *closure = cl;
-        A2Methods_UArray2 trimmed_image = closure->image;
-        A2Methods_T methods = closure->methods;
+        UArray2b_T trimmed_image = closure->image;
         unsigned denominator = closure->denominator;
         
-
         /* Get each RGB pixel from the trimmed image */
-        Pnm_rgb curr_RGB_pixel = methods->at(trimmed_image, col, row);
+        Pnm_rgb curr_RGB_pixel = UArray2b_at(trimmed_image, col, row);
 
         /* Convert to RGB values to floats */
-        float red_float = curr_RGB_pixel->red / denominator;
-        float green_float = curr_RGB_pixel->green / denominator;
-        float blue_float = curr_RGB_pixel->blue / denominator;
+        float red_float = (float)curr_RGB_pixel->red / (float)denominator;
+        float green_float = (float)curr_RGB_pixel->green / (float)denominator;
+        float blue_float = (float)curr_RGB_pixel->blue / (float)denominator;
 
         /* Calculate values for Y, Pb, and Pr */
         curr_CVS_pixel->Y = (0.299 * red_float) + 
@@ -146,32 +142,26 @@ void rgbToCompVidApply(int col, int row, A2Methods_Object *array2d, void *elem,
  * Notes:
  *     
  ************************/
-Pnm_ppm CompVidtoRGB(A2Methods_UArray2 CVS_image, 
-                                A2Methods_T methods, unsigned denominator)
+Pnm_ppm CompVidtoRGB(UArray2b_T CVS_image, A2Methods_T methods, unsigned denominator)
 {
         /* Initialize a ppm struct with information from the given CVS_image */
         Pnm_ppm ppm_image = malloc(sizeof(*ppm_image));
 
-        ppm_image->width = methods->width(CVS_image);
-        ppm_image->height = methods->height(CVS_image);
+        ppm_image->width = UArray2b_width(CVS_image);
+        ppm_image->height = UArray2b_height(CVS_image);
         ppm_image->denominator = denominator,
-        ppm_image->pixels = methods->new_with_blocksize(
-                                        methods->width(CVS_image), 
-                                        methods->height(CVS_image), 
-                                        sizeof(struct Pnm_rgb *), 
+        ppm_image->pixels = UArray2b_new(UArray2b_width(CVS_image), 
+                                        UArray2b_height(CVS_image), 
+                                        sizeof(struct Pnm_rgb), 
                                         2);
-        ppm_image->methods = CVS_image;
+        ppm_image->methods = methods;
         
         struct RGB_CVS_Closure cl = {
                 CVS_image,
-                methods, 
                 denominator
         };
         /* Visit every cell in the ppm_image pixmap and call apply function */
-        ppm_image->methods->map_default(ppm_image->pixels, CompVidtoRGBApply, 
-                                        &cl);
-
-        
+        UArray2b_map(ppm_image->pixels, CompVidtoRGBApply, &cl);
         return ppm_image;
 } 
 
@@ -196,10 +186,10 @@ Pnm_ppm CompVidtoRGB(A2Methods_UArray2 CVS_image,
  * Notes:
  *     
  ************************/
-void CompVidtoRGBApply(int col, int row, A2Methods_Object *array2d, void *elem, 
+void CompVidtoRGBApply(int col, int row, UArray2b_T array2b, void *elem, 
                        void *cl)
 {
-        (void)array2d;
+        (void)array2b;
 
         /* Get the current RGB pixel (struct containing R, G, B) */
         struct Pnm_rgb *curr_RGB_pixel = elem;
@@ -207,21 +197,21 @@ void CompVidtoRGBApply(int col, int row, A2Methods_Object *array2d, void *elem,
         /* Extract CVS image and chosen denominator from closure */
         struct RGB_CVS_Closure *closure = cl;
         A2Methods_UArray2 CVS_image = closure->image;
-        A2Methods_T methods = closure->methods;
         unsigned denominator = closure->denominator;
 
         /* Get each CVS pixel from the trimmed image */
-        struct CompVidPixel *curr_CVS_pixel = methods->at(CVS_image, col, row);
-        float Y      = curr_CVS_pixel->Y;
-        float Pb_avg = curr_CVS_pixel->Pb;
-        float Pr_avg = curr_CVS_pixel->Pr;
+        struct CompVidPixel *curr_CVS_pixel = UArray2b_at(CVS_image, col, row);
+        float Y  = curr_CVS_pixel->Y;
+        float Pb = curr_CVS_pixel->Pb;
+        float Pr = curr_CVS_pixel->Pr;
 
-        curr_RGB_pixel->red = (unsigned)(((1.0 * Y) + (0.0 * Pb_avg) + 
-                                          (1.402 * Pr_avg)) * denominator);
+        curr_RGB_pixel->red = (unsigned)(((1.0 * Y) + (0.0 * Pb) + 
+                                          (1.402 * Pr)) * denominator);
 
-        curr_RGB_pixel->green = (unsigned)(((1.0 * Y) + (0.344136 * Pb_avg) + 
-                                            (0.714136 * Pr_avg)) * denominator);
+        curr_RGB_pixel->green = (unsigned)(((1.0 * Y) - (0.344136 * Pb) - 
+                                            (0.714136 * Pr)) * denominator);
 
-        curr_RGB_pixel->blue = (unsigned)(((1.0 * Y) + (1.772 * Pb_avg) + 
-                                           (0.0 * Pr_avg)) * denominator); 
+        curr_RGB_pixel->blue = (unsigned)(((1.0 * Y) + (1.772 * Pb) + 
+                                           (0.0 * Pr)) * denominator); 
+
 }

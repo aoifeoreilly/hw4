@@ -21,7 +21,6 @@
 #include "a2blocked.h"
 #include "uarray2b.h"
 
-A2Methods_T trimPPM(Pnm_ppm ppm_image);
-
+UArray2b_T trimPPM(Pnm_ppm ppm_image);
 
 #endif

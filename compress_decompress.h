@@ -17,10 +17,11 @@
 #include "pnm.h"
 #include "a2methods.h"
 #include "a2plain.h"
-#include "a2blocked.h"
+#include <a2blocked.h>
 #include "assert.h"
 #include "trimPPM.h"
 #include "convert_comp_rgb.h"
+#include "block_unblock.h"
 
 void compress40(FILE *input);
 void decompress40(FILE *input);

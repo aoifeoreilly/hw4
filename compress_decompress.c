@@ -40,24 +40,34 @@ void compress40(FILE *input)
         /* Compression Step #1: Read in the ppm image */
         Pnm_ppm ppm_image = Pnm_ppmread(input, methods);
         assert(ppm_image != NULL);
-
+        
         /* Compression Step #2: Allocate UArray2b_T for image with trimmed 
                                 dimensions in component video color space */
-        A2Methods_UArray2 trimmed_image = trimPPM(ppm_image);
+        UArray2b_T trimmed_image = trimPPM(ppm_image);
 
-        /* Compression Step #3: Convert RGB values to comp video color format */
-        A2Methods_UArray2 CVS_image = rgbToCompVid(trimmed_image, methods, ppm_image->denominator);
-
-        /* Compression Step #4: Print the contents of CVS_image */
-        unsigned width = methods->width(CVS_image);
-        unsigned height = methods->height(CVS_image);
+        /*** PRINT TRIMMED IMAGE ***
+                Pnm_ppm final_image = malloc(sizeof(*final_image));
+                final_image->width = methods->width(trimmed_image);
+                final_image->height = methods->height(trimmed_image);
+                final_image->denominator = ppm_image->denominator;
+                final_image->pixels = trimmed_image;        
+                final_image->methods = methods;
+        */
         
-        for (unsigned i = 0; i < height; i++) {
-                for (unsigned j = 0; j < width; j++) {
-                        struct CompVidPixel *pixel = methods->at(CVS_image, j, i);
-                        printf("Y: %f, Pb: %f, Pr: %f\n", pixel->Y, pixel->Pb, pixel->Pr);
-                }
-        }
+        /* Compression Step #3: Convert RGB values to comp video color format */
+        UArray2b_T CVS_image = rgbToCompVid(trimmed_image, ppm_image->denominator);
+        Pnm_ppmfree(&ppm_image);
+        
+        /*** PRINT FRENCH IMAGE ***
+                Pnm_ppm final_image = CompVidtoRGB(CVS_image, methods, DENOMINATOR);
+                Pnm_ppmwrite(stdout, final_image);
+                Pnm_ppmfree(&final_image);
+        */
+
+        /* Compression Step #4: Pack each 2-by-2 block into one pixel */
+        UArray2b_T averageBlock = average4to1(CVS_image, methods);
+        (void)averageBlock;
+
 }
 
 /********** decompression ********
@@ -85,10 +95,11 @@ void decompress40(FILE *input)
         A2Methods_T methods = uarray2_methods_blocked;
         assert(methods != NULL);
         
-        A2Methods_UArray2 CVS_image = methods->new_with_blocksize(0, 0, 
+
+        UArray2b_T CVS_image = methods->new_with_blocksize(0, 0, 
                                              sizeof(struct CompVidPixel *), 
                                              2);    
-
+        
         Pnm_ppm ppm_image = CompVidtoRGB(CVS_image, methods, DENOMINATOR);
         Pnm_ppmwrite(stdout, ppm_image);  
 }

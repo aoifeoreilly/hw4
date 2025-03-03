@@ -54,25 +54,21 @@ struct CompVidPixel {
  ************************/
 struct RGB_CVS_Closure {
         A2Methods_UArray2 image;
-        A2Methods_T methods;
         unsigned denominator;
 };
 
 /******************************************
  *             COMPRESSION 
 *******************************************/
-A2Methods_UArray2 rgbToCompVid(A2Methods_UArray2 trimmed_image, 
-                               A2Methods_T methods, 
-                                unsigned denominator);
-void rgbToCompVidApply(int col, int row, A2Methods_Object *array2d, void *elem, 
+UArray2b_T rgbToCompVid(UArray2b_T trimmed_image, unsigned denominator);
+void rgbToCompVidApply(int col, int row, UArray2b_T array2b, void *elem, 
                        void *cl);
 
 /******************************************
  *             DECOMPRESSION
 *******************************************/
-Pnm_ppm CompVidtoRGB(A2Methods_UArray2 CVS_image, 
-                                A2Methods_T methods, unsigned denominator);
-void CompVidtoRGBApply(int col, int row, A2Methods_Object *array2d, void *elem, 
+Pnm_ppm CompVidtoRGB(UArray2b_T CVS_image, A2Methods_T methods, unsigned denominator);
+void CompVidtoRGBApply(int col, int row, UArray2b_T array2b, void *elem, 
                        void *cl);
 
 #endif
