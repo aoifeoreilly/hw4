@@ -18,11 +18,7 @@
 #include "pnm.h"
 #include "assert.h"
 #include "a2methods.h"
-#include "a2blocked.h"
-#include "uarray2b.h"
-#include "uarray2.h"
 #include "compress_decompress.h"
-#include "trimPPM.h"
 
 /********** CompVidPixel ********
  *
