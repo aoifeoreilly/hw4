@@ -35,6 +35,10 @@ UArray2b_T trimPPM(Pnm_ppm ppm_image)
         /* Get the dimensions of the original image */
         int width = ppm_image->methods->width(ppm_image->pixels);
         int height = ppm_image->methods->height(ppm_image->pixels);
+
+        /* Allocate 2D blocked array with new dimensions and element size */
+        UArray2b_T trimmed_image = UArray2b_new(width, height, 
+                                        sizeof(struct Pnm_rgb), BLOCKSIZE);
         
         /* Check which dimensions need to be trimmed */
         if (width % 2 != 0 && height % 2 != 0) {
@@ -45,14 +49,12 @@ UArray2b_T trimPPM(Pnm_ppm ppm_image)
         } else if (height % 2 != 0 && width % 2 == 0) {
                 height = height - 1;
         } else {
-                return ppm_image->pixels;
+                return trimmed_image = ppm_image->pixels;
         }
         
         /* Verify dimensions are still valid  */
         assert(width > 0 && height > 0);
         
-        /* Allocate 2D blocked array with new dimensions and element size */
-        UArray2b_T trimmed_image = UArray2b_new(width, height, sizeof(struct Pnm_rgb), 2);
 
         /* Loop through every pixel in the ppm_image and initialize the 
            UArray2b with component video color space pixels */

@@ -43,11 +43,13 @@ struct AveragePixel {
 /******************************************
  *             COMPRESSION 
 *******************************************/
-UArray2b_T average4to1(UArray2b_T CVS_image, A2Methods_T methods);
+UArray2b_T average4to1(UArray2b_T CVS_image);
 void average4to1Apply(int col, int row, UArray2b_T averageBlock, void *elm, void *cl);
 
 /******************************************
  *             DECOMPRESSION
 *******************************************/
+UArray2b_T average1to4(UArray2b_T averageBlock);
+void average1to4Apply(int col, int row, UArray2b_T averageBlock, void *elm, void *cl);
 
 #endif

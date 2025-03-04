@@ -22,6 +22,7 @@
 #include "trimPPM.h"
 #include "convert_comp_rgb.h"
 #include "block_unblock.h"
+#define BLOCKSIZE 2
 
 void compress40(FILE *input);
 void decompress40(FILE *input);

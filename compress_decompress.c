@@ -56,17 +56,25 @@ void compress40(FILE *input)
         
         /* Compression Step #3: Convert RGB values to comp video color format */
         UArray2b_T CVS_image = rgbToCompVid(trimmed_image, ppm_image->denominator);
-        Pnm_ppmfree(&ppm_image);
         
-        /*** PRINT FRENCH IMAGE ***
-                Pnm_ppm final_image = CompVidtoRGB(CVS_image, methods, DENOMINATOR);
-                Pnm_ppmwrite(stdout, final_image);
-                Pnm_ppmfree(&final_image);
-        */
+        UArray2b_T Averaged_image = average4to1(CVS_image);
+        UArray2b_T CVS_image2 = average1to4(Averaged_image);
+        
+        
+        // PRINT FRENCH IMAGE
+        Pnm_ppm final_image = CompVidtoRGB(CVS_image2, methods, DENOMINATOR);
+        Pnm_ppmwrite(stdout, final_image);
+
+        Pnm_ppmfree(&ppm_image);
+        UArray2b_free(&trimmed_image);
+        UArray2b_free(&CVS_image);
+        UArray2b_free(&CVS_image2);
+        UArray2b_free(&Averaged_image);
+        Pnm_ppmfree(&final_image);
 
         /* Compression Step #4: Pack each 2-by-2 block into one pixel */
-        UArray2b_T averageBlock = average4to1(CVS_image, methods);
-        (void)averageBlock;
+        // UArray2b_T averageBlock = average4to1(CVS_image);
+        // (void)averageBlock;
 
 }
 

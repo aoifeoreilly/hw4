@@ -30,15 +30,16 @@
  * Notes:
  *     
  ************************/
-UArray2b_T average4to1(UArray2b_T CVS_image, A2Methods_T methods)
+UArray2b_T average4to1(UArray2b_T CVS_image)
 {
-        UArray2b_T averageBlock = UArray2b_new(UArray2b_width(CVS_image) / 2,
-                                               UArray2b_height(CVS_image) / 2,
-                                               sizeof(struct AveragePixel),
-                                               1);
+        UArray2b_T averageBlock = UArray2b_new(
+                                        UArray2b_width(CVS_image) / BLOCKSIZE,
+                                        UArray2b_height(CVS_image) / BLOCKSIZE,
+                                        sizeof(struct AveragePixel),
+                                        BLOCKSIZE);
         
-        UArray2b_map(averageBlock, average4to1Apply, &CVS_image);
-        (void)methods;
+        UArray2b_map(averageBlock, average4to1Apply, CVS_image);
+        return averageBlock;
 
 }
 
@@ -46,36 +47,73 @@ void average4to1Apply(int col, int row, UArray2b_T averageBlock, void *elm, void
 {
         struct AveragePixel *curr_pixel = elm;
         UArray2b_T CVS_image = cl;
-        
-        int width = UArray2b_width(CVS_image);
-        int height = UArray2b_height(CVS_image);
-        (void)width;
-        (void)height;
-        (void)curr_pixel;
         (void)averageBlock;
 
-        // struct CompVidPixel *pix1 = UArray2b_at(CVS_image, col, row);
-        // struct CompVidPixel *pix2 = UArray2b_at(CVS_image, col + 1, row);
-        // struct CompVidPixel *pix3 = UArray2b_at(CVS_image, col, row + 1);
-        // struct CompVidPixel *pix4 = UArray2b_at(CVS_image, col + 1, row + 1);
+        curr_pixel->Pb_avg = 0;
+        curr_pixel->Pr_avg = 0;
+        for (int row_offset = 0; row_offset < BLOCKSIZE; row_offset++) {
+                for (int col_offset = 0; col_offset < BLOCKSIZE; col_offset++) {
+                        
+                        struct CompVidPixel *old_pixel = UArray2b_at(CVS_image, 
+                                                (col * BLOCKSIZE) + col_offset, 
+                                                (row * BLOCKSIZE) + row_offset);
+                        curr_pixel->Pb_avg += old_pixel->Pb;
+                        curr_pixel->Pr_avg += old_pixel->Pr;
+                        if (row_offset == 0 && col_offset == 0) {
+                                curr_pixel->Y1 = old_pixel->Y;
+                        } else if (row_offset == 0 && col_offset == 1) {
+                                curr_pixel->Y2 = old_pixel->Y;
+                        } else if (row_offset == 1 && col_offset == 0) {
+                                curr_pixel->Y3 = old_pixel->Y;
+                        } else {
+                                curr_pixel->Y4 = old_pixel->Y;
+                        }
+                        
+                }
+        }
+        if (curr_pixel->Pb_avg != 0) {
+                curr_pixel->Pb_avg /= (BLOCKSIZE * BLOCKSIZE);
+        }
+        if (curr_pixel->Pr_avg != 0) {
+                curr_pixel->Pr_avg /= (BLOCKSIZE * BLOCKSIZE);
+        }
+}
 
-        // float Pb1  = pix1->Pb1;
-        // float Pb2  = pix2->Pb2;
-        // float Pb3  = pix3->Pb3;
-        // float Pb4  = pix4->Pb4;
-        // float Pb = (Pb1 + Pb2 + Pb3 + Pb4) / 4;
+UArray2b_T average1to4(UArray2b_T averageBlock)
+{
+        UArray2b_T CVS_image = UArray2b_new(
+                                UArray2b_width(averageBlock) * BLOCKSIZE,
+                                UArray2b_height(averageBlock) * BLOCKSIZE,
+                                sizeof(struct CompVidPixel),
+                                BLOCKSIZE);
+        
+        UArray2b_map(averageBlock, average1to4Apply, CVS_image);
+        return CVS_image;
+}
 
-        float Pb_avg = 0;
-        float Pr_avg = 0;
-        float Y1;
-        float Y2;
-        float Y3;
-        float Y4;
+void average1to4Apply(int col, int row, UArray2b_T averageBlock, void *elm, void *cl)
+{
+        struct AveragePixel *curr_pixel = elm;
+        UArray2b_T CVS_image = cl;
+        (void)averageBlock;
 
-        for (int curr_row = 0; curr_row < BLOCKSIZE; curr_row++) {
-                for (int curr_col = 0; curr_col < BLOCKSIZE; curr_col++) {
-                        UArray2b_at(CVS_image, (col * 2) + curr_col, (row * 2) + cur_row);
-                        // UArray2b_at(CVS_image, col * 2, row * 2);
+        for (int row_offset = 0; row_offset < BLOCKSIZE; row_offset++) {
+                for (int col_offset = 0; col_offset < BLOCKSIZE; col_offset++) {
+                        struct CompVidPixel *new_pixel = UArray2b_at(CVS_image, 
+                                                        (col * 2) + col_offset, 
+                                                        (row * 2) + row_offset);
+                        new_pixel->Pb = curr_pixel->Pb_avg;
+                        new_pixel->Pr = curr_pixel->Pr_avg;
+                        if(row_offset == 0 && col_offset == 0) {
+                                new_pixel->Y = curr_pixel->Y1;
+                        } else if (row_offset == 0 && col_offset == 1) {
+                                new_pixel->Y = curr_pixel->Y2;
+                        } else if (row_offset == 1 && col_offset == 0) {
+                                new_pixel->Y = curr_pixel->Y3;
+                        } else {
+                                new_pixel->Y = curr_pixel->Y4;
+                        }
                 }
         }
 }
+

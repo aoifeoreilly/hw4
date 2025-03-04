@@ -20,6 +20,7 @@
 #include "a2methods.h"
 #include "a2blocked.h"
 #include "uarray2b.h"
+#include "compress_decompress.h"
 
 UArray2b_T trimPPM(Pnm_ppm ppm_image);
 
