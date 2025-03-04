@@ -205,13 +205,35 @@ void CompVidtoRGBApply(int col, int row, UArray2b_T array2b, void *elem,
         float Pb = curr_CVS_pixel->Pb;
         float Pr = curr_CVS_pixel->Pr;
 
-        curr_RGB_pixel->red = (unsigned)(((1.0 * Y) + (0.0 * Pb) + 
-                                          (1.402 * Pr)) * denominator);
+        signed red_signed = (signed)(((1.0 * Y) + (0.0 * Pb) + 
+                                      (1.402 * Pr)) * denominator);
 
-        curr_RGB_pixel->green = (unsigned)(((1.0 * Y) - (0.344136 * Pb) - 
-                                            (0.714136 * Pr)) * denominator);
+        signed green_signed = (signed)(((1.0 * Y) - (0.344136 * Pb) - 
+                                        (0.714136 * Pr)) * denominator);
 
-        curr_RGB_pixel->blue = (unsigned)(((1.0 * Y) + (1.772 * Pb) + 
-                                           (0.0 * Pr)) * denominator); 
+        signed blue_signed = (signed)(((1.0 * Y) + (1.772 * Pb) + 
+                                       (0.0 * Pr)) * denominator);
 
+        /* Clamp signed values between 0 and 255 */
+        if (red_signed < 0) {
+                red_signed = 0;
+        } else if (red_signed > 255) {
+                red_signed = 255;
+        }
+
+        if (green_signed < 0) {
+                green_signed = 0;
+        } else if (green_signed > 255) {
+                green_signed = 255;
+        }
+
+        if (blue_signed < 0) {
+                blue_signed = 0;
+        } else if (blue_signed > 255) {
+                blue_signed = 255;
+        }
+        
+        curr_RGB_pixel->red = (unsigned)red_signed;
+        curr_RGB_pixel->green = (unsigned)green_signed;
+        curr_RGB_pixel->blue = (unsigned)blue_signed;
 }
