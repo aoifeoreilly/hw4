@@ -57,11 +57,15 @@ void compress40(FILE *input)
         /* Compression Step #3: Convert RGB values to comp video color format */
         UArray2b_T CVS_image = rgbToCompVid(trimmed_image, ppm_image->denominator);
         
+        /* Compression Step #4: fuck that jawn up */
         UArray2b_T Averaged_image = average4to1(CVS_image);
-        UArray2b_T CVS_image2 = average1to4(Averaged_image);
-        
-        
-        // PRINT FRENCH IMAGE
+
+        /* Compression Step #5: shit the bed */
+        UArray2b_T DCT_image = CVS_to_DCT(Averaged_image);
+
+        /*  */
+        UArray2b_T Averaged_image2 = DCT_to_CVS(DCT_image);
+        UArray2b_T CVS_image2 = average1to4(Averaged_image2);
         Pnm_ppm final_image = CompVidtoRGB(CVS_image2, methods, DENOMINATOR);
         Pnm_ppmwrite(stdout, final_image);
 
@@ -71,10 +75,6 @@ void compress40(FILE *input)
         UArray2b_free(&CVS_image2);
         UArray2b_free(&Averaged_image);
         Pnm_ppmfree(&final_image);
-
-        /* Compression Step #4: Pack each 2-by-2 block into one pixel */
-        // UArray2b_T averageBlock = average4to1(CVS_image);
-        // (void)averageBlock;
 
 }
 

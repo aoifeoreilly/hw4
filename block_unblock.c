@@ -107,12 +107,12 @@ void average4to1Apply(int col, int row, UArray2b_T averageCVS, void *elm, void *
            convert to 4-bit quantized representation of the chroma value */
         if (Pb_avg != 0) {
                 Pb_avg /= (BLOCKSIZE * BLOCKSIZE);
-                curr_pixel->Pb_avg = Arith40_index_of_chroma(Pb_avg);
         }
+        curr_pixel->Pb_avg = Arith40_index_of_chroma(Pb_avg);
         if (Pr_avg != 0) {
                 Pr_avg /= (BLOCKSIZE * BLOCKSIZE);
-                curr_pixel->Pr_avg = Arith40_index_of_chroma(Pr_avg);
         }
+        curr_pixel->Pr_avg = Arith40_index_of_chroma(Pr_avg);
 }
 
 
@@ -182,7 +182,7 @@ void average1to4Apply(int col, int row, UArray2b_T averageCVS, void *elm, void *
                         new_pixel->Pr = Arith40_chroma_of_index(curr_pixel->Pr_avg);
 
                         /* Set the corresponding Y values */
-                        if(row_offset == 0 && col_offset == 0) {
+                        if (row_offset == 0 && col_offset == 0) {
                                 new_pixel->Y = curr_pixel->Y1;
                         } else if (row_offset == 0 && col_offset == 1) {
                                 new_pixel->Y = curr_pixel->Y2;
