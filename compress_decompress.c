@@ -67,7 +67,12 @@ void compress40(FILE *input)
         UArray2b_T Averaged_image2 = DCT_to_CVS(DCT_image);
         UArray2b_T CVS_image2 = average1to4(Averaged_image2);
         Pnm_ppm final_image = CompVidtoRGB(CVS_image2, methods, DENOMINATOR);
-        Pnm_ppmwrite(stdout, final_image);
+        // Pnm_ppmwrite(stdout, final_image);
+        // if (Bitpack_fitsu(-21, 52)) {
+        //         printf("FITS!\n");
+        // }
+        int64_t test_word = Bitpack_gets(0x3f4, 6, 2);
+        printf("testword: %ld\n", test_word);
 
         Pnm_ppmfree(&ppm_image);
         UArray2b_free(&trimmed_image);

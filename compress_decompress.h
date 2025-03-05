@@ -23,6 +23,7 @@
 #include "convert_comp_rgb.h"
 #include "block_unblock.h"
 #include "DCT_transform.h"
+#include <bitpack.h>
 #define BLOCKSIZE 2
 
 void compress40(FILE *input);

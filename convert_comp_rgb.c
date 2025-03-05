@@ -46,7 +46,7 @@ UArray2b_T rgbToCompVid(UArray2b_T trimmed_image, unsigned denominator)
         UArray2b_T CVS_image = UArray2b_new(UArray2b_width(trimmed_image),
                                         UArray2b_height(trimmed_image), 
                                         sizeof(struct CompVidPixel),
-                                        BLOCKSIZE);
+                                        2);
         
         /* Visit every cell in CVS_image and call the apply function */
         UArray2b_map(CVS_image, rgbToCompVidApply, &cl);
@@ -153,7 +153,7 @@ Pnm_ppm CompVidtoRGB(UArray2b_T CVS_image, A2Methods_T methods, unsigned denomin
         ppm_image->pixels = UArray2b_new(UArray2b_width(CVS_image), 
                                         UArray2b_height(CVS_image), 
                                         sizeof(struct Pnm_rgb), 
-                                        BLOCKSIZE);
+                                        2);
         ppm_image->methods = methods;
         
         struct RGB_CVS_Closure cl = {
