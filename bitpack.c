@@ -18,6 +18,24 @@
 Except_T Bitpack_Overflow = { "Overflow packing bits" };
 
 
+/********** Bitpack_fitsu ********
+ *
+ * Determines whether the unsigned argument n can be represented in width bits.
+ *
+ * Parameters:
+ *      uint64_t n    : an unsigned integer to check if it can be represented.
+ *      unsigned width: the maximum number of bits that given argument can be
+ *                      represent in.
+ * 
+ * Return: True if the argument 'n' can be represented in 'width' bits.
+ *         False if the argument 'n' cannot be represented in 'width' bits.
+ *
+ * Expects:
+ *     
+ * 
+ * Notes:
+ *     
+ ************************/
 bool Bitpack_fitsu(uint64_t n, unsigned width)
 {
         /* Spec says to do this MIGHT NEED SOMETHING ELSE IDK */
@@ -33,6 +51,24 @@ bool Bitpack_fitsu(uint64_t n, unsigned width)
         return n <= max;
 }
 
+/********** Bitpack_fitss ********
+ *
+ * Determines whether the signed argument n can be represented in width bits.
+ *
+ * Parameters:
+ *      int64_t n     : a signed integer to check if it can be represented.
+ *      unsigned width: the maximum number of bits that given argument can be
+ *                      represent in.
+ * 
+ * Return: True if the argument 'n' can be represented in 'width' bits.
+ *         False if the argument 'n' cannot be represented in 'width' bits.
+ *
+ * Expects:
+ *     
+ * 
+ * Notes:
+ *     
+ ************************/
 bool Bitpack_fitss(int64_t n, unsigned width)
 {
         /* Spec says to do this MIGHT NEED SOMETHING ELSE IDK */
@@ -51,6 +87,25 @@ bool Bitpack_fitss(int64_t n, unsigned width)
 
 }
 
+/********** Bitpack_getu ********
+ *
+ * Extracts a field from a word given the width of the field and the location 
+ * of the field’s least significant bit.
+ *
+ * Parameters:
+ *      uint64_t word:
+ *      unsigned width:
+ *      unsigned lsb:
+ * 
+ * Return: 
+ *
+ * Expects:
+ *     
+ * 
+ * Notes:
+ *     This function will C.R.E if called with a width that is not 0 ≤ w ≤ 64.
+ * 
+ ************************/
 uint64_t Bitpack_getu(uint64_t word, unsigned width, unsigned lsb)
 {
         /* Spec says to do this MIGHT NEED SOMETHING ELSE IDK */
