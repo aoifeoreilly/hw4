@@ -24,6 +24,8 @@
 #include "block_unblock.h"
 #include "DCT_transform.h"
 #include <bitpack.h>
+#include "pack_unpack.h"
+#include "read_write.h"
 #define BLOCKSIZE 2
 
 void compress40(FILE *input);

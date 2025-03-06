@@ -4,7 +4,7 @@
  *
  *      Assignment: arith
  *      Authors:    Griffin Faecher (gfaech01) and Aoife O'Reilly (aoreil02)
- *      Date:       2/21/2025
+ *      Date:       3/5/2025
  *
  *      This file
  *
@@ -46,8 +46,7 @@ bool Bitpack_fitsu(uint64_t n, unsigned width)
         if (width == 64) {
                 return true;
         }
-        uint64_t max = (0x0000000000000001u << width) - 1;
-        printf("n: %lu | max: %u\n", n, (0x0000000000000001u << width) - 1);
+        uint64_t max = (1ULL << width) - 1;
         return n <= max;
 }
 
@@ -81,7 +80,7 @@ bool Bitpack_fitss(int64_t n, unsigned width)
                 return true;
         }
         /* Find the min and max values given width, and check to see if n fits*/
-        int64_t max = (0x0000000000000001u << (width - 1)) - 1;
+        int64_t max = (1ULL << (width - 1)) - 1;
         int64_t min = ~max;
         return n <= max && n >= min;
 
@@ -90,7 +89,7 @@ bool Bitpack_fitss(int64_t n, unsigned width)
 /********** Bitpack_getu ********
  *
  * Extracts a field from a word given the width of the field and the location 
- * of the field’s least significant bit.
+ * of the field's least significant bit.
  *
  * Parameters:
  *      uint64_t word:
@@ -103,7 +102,7 @@ bool Bitpack_fitss(int64_t n, unsigned width)
  *     
  * 
  * Notes:
- *     This function will C.R.E if called with a width that is not 0 ≤ w ≤ 64.
+ *     This function will C.R.E if called with width that is not 0 <= w <= 64.
  * 
  ************************/
 uint64_t Bitpack_getu(uint64_t word, unsigned width, unsigned lsb)
@@ -145,19 +144,24 @@ int64_t Bitpack_gets(uint64_t word, unsigned width, unsigned lsb)
 
 uint64_t Bitpack_newu(uint64_t word, unsigned width, unsigned lsb, uint64_t value)
 {
-        /* Spec says to do this MIGHT NEED SOMETHING ELSE IDK */
-        assert(width + lsb <= 64);
-        assert(width <= 64);
-        if (!Bitpack_fitsu(value, width)) {
-                RAISE(Bitpack_Overflow);
-        }
-        /* Create mask for desired bits */
-        uint64_t mask = ((1 << width) - 1) << lsb;
-        /* Clear desired bits */
-        word &= ~mask;
-        /* Set desired bits */
-        word |= (value << lsb);
-        return word;
+    /* Check preconditions */
+    assert(width + lsb <= 64);
+    assert(width <= 64);
+
+    if (!Bitpack_fitsu(value, width)) {
+        RAISE(Bitpack_Overflow);
+    }
+
+    /* Create mask for desired bits (using 1ULL for 64-bit shifts) */
+    uint64_t mask = ((1ULL << width) - 1) << lsb;
+
+    /* Clear desired bits */
+    word &= ~mask;
+
+    /* Set desired bits */
+    word |= (value << lsb);
+
+    return word;
 }
 
 uint64_t Bitpack_news(uint64_t word, unsigned width, unsigned lsb,  int64_t value)
@@ -169,12 +173,12 @@ uint64_t Bitpack_news(uint64_t word, unsigned width, unsigned lsb,  int64_t valu
                 RAISE(Bitpack_Overflow);
         }
         /* Create mask for desired bits */
-        uint64_t mask = ((1 << width) - 1) << lsb;
+        uint64_t mask = ((1ULL << width) - 1ULL) << lsb;
         /* Clear desired bits */
         word &= ~mask;
         /* Get rid of sign extended bits to not mess with or operation and set 
         bits */
-        word |= (((value << (64 - width)) >> (64 - width)) << lsb);
+        word |= (((uint64_t)value << (64 - width)) >> (64 - width)) << lsb;
         return word;
 
 }

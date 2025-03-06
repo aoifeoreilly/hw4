@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *                   trimPPM.h
+ *                   read_write.h
  *
  *      Assignment: arith
  *      Edited by:  Aoife O'Reilly (aoreil02) and Griffin Faecher (gfaech01)
@@ -10,17 +10,17 @@
  *
  **********************************************************/
 
-#ifndef TRIMPPM_H
-#define TRIMPPM_H
+#ifndef READ_WRITE_H
+#define READ_WRITE_H
 
 #include <stdio.h>
 #include "compress40.h"
 #include "pnm.h"
 #include "assert.h"
 #include "a2methods.h"
-#include "uarray2b.h"
 #include "compress_decompress.h"
 
-UArray2b_T trimPPM(Pnm_ppm ppm_image);
+void write(UArray2b_T packed_image, int trimmed_width, int trimmed_height);
+UArray2b_T read(FILE *input);
 
 #endif
