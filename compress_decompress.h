@@ -17,18 +17,17 @@
 #include <stdio.h>
 #include <a2blocked.h>
 #include <bitpack.h>
-#include "pnm.h"
 #include <a2methods.h>
-#include "a2plain.h"
-#include "uarray2.h"
 #include "assert.h"
+#include "pnm.h"
+#include "uarray2.h"
+#include "uarray2b.h"
 #include "trimPPM.h"
 #include "convert_comp_rgb.h"
 #include "block_unblock.h"
 #include "DCT_transform.h"
 #include "pack_unpack.h"
 #include "read_write.h"
-#include "uarray2b.h"
 #define BLOCKSIZE 2
 
 void compress40(FILE *input);

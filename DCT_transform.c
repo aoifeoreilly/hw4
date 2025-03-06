@@ -6,7 +6,10 @@
  *      Edited by:  Aoife O'Reilly (aoreil02) and Griffin Faecher (gfaech01)
  *      Date:       3/4/2025
  *
- *      TODO
+ *      Converts the pixels of the given image between component video
+ *      color space and their discrete cosine transform equivalents.
+ *      Transforms the float values into signed and unsigned integers and
+ *      vice versa.
  *
  **********************************************************/
 
@@ -16,7 +19,9 @@
 
 /********** CVS_to_DCT ********
  *
- *  
+ *  Converts the pixels in the given 2D blocked array from component video
+ *  color space to the cosine coeffecients a, b, c, and d using the discrete 
+ *  cosine transform. Pb and Pr remain the same.
  *
  * Parameters:
  *      UArray2b_T averageCVS:
@@ -25,18 +30,23 @@
  *      A 2D blocked array 
  *
  * Expects:
- *     
+ *     A valid 2D blocked array.
  * 
  * Notes:
- *      
+ *      Will C.R.E if the given UArray2b_T is not valid.
+ *      Allocates a new 2D blocked array.
+ *      Will C.R.E if the new 2D blocked array is not allocated properly.
  * 
  ************************/
 UArray2b_T CVS_to_DCT(UArray2b_T averageCVS)
 {
+        assert(averageCVS != NULL);
         UArray2b_T DCT_array = UArray2b_new(UArray2b_width(averageCVS),
                                             UArray2b_height(averageCVS), 
                                             sizeof(struct DCT_Pixel),
                                             1);
+
+        assert(DCT_array != NULL);
 
         /* Iterate through given array of CVS pixels */
         UArray2b_map(averageCVS, CVS_to_DCT_Apply, DCT_array);
@@ -45,22 +55,27 @@ UArray2b_T CVS_to_DCT(UArray2b_T averageCVS)
 
 /********** CVS_to_DCT_Apply ********
  *
- *  
+ *  Apply function to help map through the 2D blocked array of component video
+ *  space pixels and converts 'a' to a 9-bit unsigned integer, and 'b', 'c', 
+ *  and 'd' to 5-bit signed integers using the discrete cosine transform.
  *
  * Parameters:
- *      UArray2b_T averageCVS:
+ *      UArray2b_T averageCVS: A 2D blocked array of 
  * 
  * Return: 
- *      A 2D blocked array 
+ *      None.
  *
  * Expects:
- *     
+ *      A valid UArray2b_T array.
+ *      Properly initialized element and closure pointers.
  * 
  * Notes:
- *      
+ *      Clamps the CVS floats between -0.3 and +0.3.
+ *      Will C.R.E. if the pointer arguments are passed in as NULL.
  * 
  ************************/
-void CVS_to_DCT_Apply(int col, int row, UArray2b_T averageCVS, void *elm, void *cl)
+void CVS_to_DCT_Apply(int col, int row, UArray2b_T averageCVS, void *elm, 
+                                                               void *cl)
 {
         (void)averageCVS;
 
@@ -124,52 +139,63 @@ void CVS_to_DCT_Apply(int col, int row, UArray2b_T averageCVS, void *elm, void *
 
 /********** DCT_to_CVS ********
  *
- *  
+ *  Converts the pixels in the given 2D blocked array from cosine coefficient
+ *  elements to component video space using the inverse discrete cosine 
+ *  transform. Pb and Pr remain the same.
  *
  * Parameters:
- *      UArray2b_T DCT_array:
+ *      UArray2b_T DCT_array: A 2D blocked array of cosine coefficients.
  * 
  * Return: 
- *      A 2D blocked array 
+ *      A 2D blocked array with component video space pixels.
  *
  * Expects:
- *     
+ *     A valid 2D blocked array.
  * 
  * Notes:
- *      
+ *      Will C.R.E if the given UArray2b_T is not valid.
+ *      Allocates a new 2D blocked array.
+ *      Will C.R.E if the new 2D blocked array is not allocated properly.
  * 
  ************************/
 UArray2b_T DCT_to_CVS(UArray2b_T DCT_array)
 {
+        assert(DCT_array != NULL);
         UArray2b_T averageCVS = UArray2b_new(UArray2b_width(DCT_array),
                                             UArray2b_height(DCT_array), 
                                             sizeof(struct AveragePixel),
                                             1);
+        assert(averageCVS != NULL);
 
         /* Iterate through given array of CVS pixels */
         UArray2b_map(DCT_array, DCT_to_CVS_Apply, averageCVS);
         return averageCVS;
-        
 }
 
 /********** DCT_to_CVS_Apply ********
  *
- *  
+ *  Apply function to help map through the 2D blocked array of component video
+ *  space pixels and computes Y1, Y2, Y3, and Y4 from a, b, c, and d using
+ *  the inverse discrete cosine transform.
  *
  * Parameters:
- *      UArray2b_T averageCVS:
+ *      UArray2b_T DCT_array: A 2D blocked array of cosine coefficient
+ *                            elements.
  * 
  * Return: 
- *      A 2D blocked array 
+ *      None.
  *
  * Expects:
- *     
+ *      A valid UArray2b_T array.
+ *      Properly initialized element and closure pointers.
  * 
  * Notes:
- *      
+ *      Clamps the CVS floats between -0.3 and +0.3.
+ *      Will C.R.E. if the pointer arguments are passed in as NULL.
  * 
  ************************/
-void DCT_to_CVS_Apply(int col, int row, UArray2b_T DCT_array, void *elm, void *cl)
+void DCT_to_CVS_Apply(int col, int row, UArray2b_T DCT_array, void *elm, 
+                                                              void *cl)
 {
         (void)DCT_array;
         struct DCT_Pixel *curr_pixel = elm;

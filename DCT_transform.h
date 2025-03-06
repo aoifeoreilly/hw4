@@ -22,12 +22,13 @@
 
 /********** DCT_Pixel ********
  *
- * This structure represents a 
+ * This structure represents a pixel with cosine coefficient elements,
+ * after being converted from floats using the discrete cosine transform.
  *
  * Elements:
- *      unsigned a              : 
- *      signed b, c, d          : 
- *      unsigned Pb_avg, Pr_avg : 
+ *      unsigned a              : nine-bit unsigned cosine coefficient.
+ *      signed b, c, d          : five-bit signed cosine coefficients.
+ *      unsigned Pb_avg, Pr_avg : four-bit unsigned indeces.
  * 
  ************************/
 struct DCT_Pixel {
@@ -40,12 +41,14 @@ struct DCT_Pixel {
  *             COMPRESSION 
 *******************************************/
 UArray2b_T CVS_to_DCT(UArray2b_T averageCVS);
-void CVS_to_DCT_Apply(int col, int row, UArray2b_T averageCVS, void *elm, void *cl);
+void CVS_to_DCT_Apply(int col, int row, UArray2b_T averageCVS, void *elm, 
+                                                               void *cl);
 
 /******************************************
  *             DECOMPRESSION
 *******************************************/
 UArray2b_T DCT_to_CVS(UArray2b_T averageCVS);
-void DCT_to_CVS_Apply(int col, int row, UArray2b_T averageCVS, void *elm, void *cl);
+void DCT_to_CVS_Apply(int col, int row, UArray2b_T averageCVS, void *elm, 
+                                                               void *cl);
 
 #endif
