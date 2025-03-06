@@ -6,7 +6,8 @@
  *     Authors:    Griffin Faecher (gfaech01) and Aoife O'Reilly (aoreil02)
  *     Date:       2/28/2025
  *
- *     
+ *     Contains function declarations for converting an image between RGB 
+ *     and component video space.
  *
  *************************************************************/
 
@@ -19,6 +20,7 @@
 #include "assert.h"
 #include "a2methods.h"
 #include "compress_decompress.h"
+#include "uarray2b.h"
 
 /********** CompVidPixel ********
  *
@@ -38,7 +40,8 @@ struct CompVidPixel {
 
 /********** RGB_CVS_Closure ********
  *
- * 
+ * This structure allows us to pass in an image and denominator to the 
+ * specified apply function.
  *
  * Elements:
  *      A2Methods_T image    : For compression   - image represents the trimmed 
@@ -49,7 +52,7 @@ struct CompVidPixel {
  * 
  ************************/
 struct RGB_CVS_Closure {
-        A2Methods_UArray2 image;
+        UArray2b_T image;
         unsigned denominator;
 };
 

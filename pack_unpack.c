@@ -12,18 +12,53 @@
 
 #include "pack_unpack.h"
 
+/********** pack_image ********
+ *
+ *  
+ *
+ * Parameters:
+ *      UArray2b_T DCT_image:
+ * 
+ * Return: 
+ *      A 2D blocked array 
+ *
+ * Expects:
+ *     
+ * 
+ * Notes:
+ *      
+ * 
+ ************************/
 UArray2b_T pack_image(UArray2b_T DCT_image)
 {
         assert(DCT_image != NULL);
         UArray2b_T packed_image = UArray2b_new(UArray2b_width(DCT_image),
                                                 UArray2b_height(DCT_image), 
-                                                sizeof(uint32_t), BLOCKSIZE);
+                                                sizeof(uint32_t),
+                                                1);
         assert(packed_image != NULL);
         UArray2b_map(DCT_image, pack_image_apply, packed_image);
         
         return packed_image;
 }
 
+/********** pack_image_apply ********
+ *
+ *  
+ *
+ * Parameters:
+ *      
+ * 
+ * Return: 
+ *      None.
+ *
+ * Expects:
+ *     
+ * 
+ * Notes:
+ *      
+ * 
+ ************************/
 void pack_image_apply(int col, int row, UArray2b_T DCT_image, void *elem, void *cl)
 {
         (void)DCT_image;
@@ -41,14 +76,30 @@ void pack_image_apply(int col, int row, UArray2b_T DCT_image, void *elem, void *
         *word = Bitpack_newu(*word, 4, 0, curr_pixel->Pr_avg);
 }
 
-
+/********** unpack_image ********
+ *
+ *  
+ *
+ * Parameters:
+ *      UArray2b_T packed_image:
+ * 
+ * Return: 
+ *      A 2D blocked array 
+ *
+ * Expects:
+ *     
+ * 
+ * Notes:
+ *      
+ * 
+ ************************/
 UArray2b_T unpack_image(UArray2b_T packed_image)
 {
         assert(packed_image != NULL);
         UArray2b_T DCT_image = UArray2b_new(UArray2b_width(packed_image),
                                                  UArray2b_height(packed_image), 
                                                  sizeof(struct DCT_Pixel),
-                                                 2);
+                                                 1);
         assert(DCT_image != NULL);
 
         /* Iterate through the array of DCT structs */
@@ -56,6 +107,23 @@ UArray2b_T unpack_image(UArray2b_T packed_image)
         return DCT_image;
 }
 
+/********** unpack_image_apply ********
+ *
+ *  
+ *
+ * Parameters:
+ *      
+ * 
+ * Return: 
+ *      None.
+ *
+ * Expects:
+ *     
+ * 
+ * Notes:
+ *      
+ * 
+ ************************/
 void unpack_image_apply(int col, int row, UArray2b_T packed_image, void *elem, void *cl)
 {
         (void)packed_image;

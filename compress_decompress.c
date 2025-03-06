@@ -6,7 +6,10 @@
  *      Edited by:  Aoife O'Reilly (aoreil02) and Griffin Faecher (gfaech01)
  *      Date:       2/28/2025
  *
- *      
+ *      Carries out the compression and decompression algorithms as outlined 
+ *      in the spec. This program converts the pixels within a given ppm image
+ *      to a smaller binary image consisting of 32-bit codewords and back to 
+ *      carry out the image manipulation process.
  *
  **********************************************************/
 
@@ -15,23 +18,26 @@
 
 /********** compression ********
  *
- * 
+ * Compresses a full-color portable pixmap to a smaller binary image.
  *
  * Parameters:
- *      FILE *input: 
+ *      FILE *input: A file pointer to the image to compress.
  * 
  * Return:
- *      None
+ *      None.
  *
  * Expects:
- *      
+ *      The given file, method, and map function not to be NULL.
  *
  * Notes:
+ *      Writes the compressed image to standard output.
+ *      Will C.R.E. if the given file, method, or map function are NULL.
+ *      Will C.R.E if any of the non-void functions return a NULL argument.
  *     
  ************************/
 void compress40(FILE *input)
 {
-        /* Verify valid input file and use UArray2 blocked methods */
+        /* Verify valid input file and use UArray2b blocked methods */
         assert(input != NULL);
         A2Methods_T methods = uarray2_methods_blocked;
         assert(methods != NULL);
@@ -71,39 +77,40 @@ void compress40(FILE *input)
         UArray2b_free(&DCT_image);
 
         /* Compression Step #7: Write compressed image to standard output */
-        write(packed_image, trimmed_width, trimmed_height);
+        write_out(packed_image, trimmed_width, trimmed_height);
         UArray2b_free(&packed_image);
 }
 
 /********** decompression ********
  *
- * 
+ * Decompresses a binary image into a full-color portable pixmap.
  *
  * Parameters:
- *      FILE *input: 
+ *      FILE *input:  A file pointer to the image to decompress.
  * 
  * Return:
- *      None
+ *      None.
  *
  * Expects:
- *      
+ *      The given file, method, and map function not to be NULL.
  *
  * Notes:
- *     
+ *      Writes the decompressed image to standard output.
+ *      Will C.R.E. if the given file, method, or map function are NULL.
+ *      Will C.R.E if any of the non-void functions return a NULL argument.
+ * 
  ************************/
 void decompress40(FILE *input)
 {      
-        assert(input != NULL);  
+        assert(input != NULL);
         
         /* Decompression Step #1: Read the header of the compressed file */
         UArray2b_T packed_image = read_input(input);
-
         /* Decompression Step #2: For each code word, unpack a, b, c, d, PB, 
                                   and PR into local variables */
         UArray2b_T DCT_image = unpack_image(packed_image);
         assert(DCT_image != NULL);
         UArray2b_free(&packed_image);
-
         /* Decompression Step #4: Use inverse DCT to compute Y1, Y2, Y3, Y4 */
         UArray2b_T averaged_image = DCT_to_CVS(DCT_image);
         assert(averaged_image != NULL);
@@ -114,17 +121,12 @@ void decompress40(FILE *input)
         UArray2b_T CVS_image = average1to4(averaged_image);
         assert(CVS_image != NULL);
         UArray2b_free(&averaged_image);
-
         /* Decompression Step #6: Transform CVS to RGB */
         A2Methods_T methods = uarray2_methods_blocked;
         assert(methods != NULL);
-        A2Methods_mapfun *map = methods->map_default; 
-        assert(map != NULL);
-
         Pnm_ppm ppm_image = CompVidtoRGB(CVS_image, methods, DENOMINATOR);
         assert(ppm_image != NULL);
         UArray2b_free(&CVS_image);
-
         /* Decompression Step #7: Write uncompressed image to standard output */
         Pnm_ppmwrite(stdout, ppm_image);
         Pnm_ppmfree(&ppm_image);

@@ -26,7 +26,7 @@
  *                   color space.
  *
  * Expects:
- *      TODO
+ *      The given array not to be NULL.
  *
  * Notes:
  *      Converts unsigned values to a floating-point representation.
@@ -46,7 +46,7 @@ UArray2b_T rgbToCompVid(UArray2b_T trimmed_image, unsigned denominator)
         UArray2b_T CVS_image = UArray2b_new(UArray2b_width(trimmed_image),
                                         UArray2b_height(trimmed_image), 
                                         sizeof(struct CompVidPixel),
-                                        2);
+                                        BLOCKSIZE);
         
         /* Visit every cell in CVS_image and call the apply function */
         UArray2b_map(CVS_image, rgbToCompVidApply, &cl);
@@ -152,8 +152,8 @@ Pnm_ppm CompVidtoRGB(UArray2b_T CVS_image, A2Methods_T methods, unsigned denomin
         ppm_image->denominator = denominator,
         ppm_image->pixels = UArray2b_new(UArray2b_width(CVS_image), 
                                         UArray2b_height(CVS_image), 
-                                        sizeof(struct Pnm_rgb), 
-                                        2);
+                                        sizeof(struct Pnm_rgb),
+                                        BLOCKSIZE);
         ppm_image->methods = methods;
         
         struct RGB_CVS_Closure cl = {
@@ -196,7 +196,7 @@ void CompVidtoRGBApply(int col, int row, UArray2b_T array2b, void *elem,
 
         /* Extract CVS image and chosen denominator from closure */
         struct RGB_CVS_Closure *closure = cl;
-        A2Methods_UArray2 CVS_image = closure->image;
+        UArray2b_T CVS_image = closure->image;
         unsigned denominator = closure->denominator;
 
         /* Get each CVS pixel from the trimmed image */

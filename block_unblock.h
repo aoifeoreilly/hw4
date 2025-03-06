@@ -6,7 +6,8 @@
  *     Authors:    Griffin Faecher (gfaech01) and Aoife O'Reilly (aoreil02)
  *     Date:       3/1/2025
  *
- *     
+ *     Contains the function declarations for the methods that will help 
+ *     average the chroma elements of a 2x2 block and perform quantization.
  *
  *************************************************************/
 
@@ -19,15 +20,15 @@
 #include "a2methods.h"
 #include "convert_comp_rgb.h"
 #include "arith40.h"
-#define BLOCKSIZE 2
 
 /********** AveragePixel ********
  *
+ * This structs holds the component video space values with averaged chroma
+ * elements that are stored in each element of the averageCVS array.
  * 
- *
  * Elements:
- *      float Y1, Y2, Y3, Y4 : 
- *      unsigned Pr_avg, Pb_avg :
+ *      float Y1, Y2, Y3, Y4    : the four brightness values.
+ *      unsigned Pr_avg, Pb_avg : the averaged chroma elements.
  * 
  ************************/
 struct AveragePixel {
@@ -39,12 +40,14 @@ struct AveragePixel {
  *             COMPRESSION 
 *******************************************/
 UArray2b_T average4to1(UArray2b_T CVS_image);
-void average4to1Apply(int col, int row, UArray2b_T averageCVS, void *elm, void *cl);
+void average4to1Apply(int col, int row, UArray2b_T averageCVS, void *elm,
+                                                               void *cl);
 
 /******************************************
  *             DECOMPRESSION
 *******************************************/
 UArray2b_T average1to4(UArray2b_T averageCVS);
-void average1to4Apply(int col, int row, UArray2b_T averageCVS, void *elm, void *cl);
+void average1to4Apply(int col, int row, UArray2b_T averageCVS, void *elm, 
+                                                               void *cl);
 
 #endif
