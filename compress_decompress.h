@@ -20,6 +20,7 @@
 #include "pnm.h"
 #include <a2methods.h>
 #include "a2plain.h"
+#include "uarray2.h"
 #include "assert.h"
 #include "trimPPM.h"
 #include "convert_comp_rgb.h"

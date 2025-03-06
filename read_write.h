@@ -23,7 +23,7 @@
 #include "bitpack.h"
 #include "compress_decompress.h"
 
-void write_out(UArray2b_T packed_image, int trimmed_width, int trimmed_height);
-UArray2b_T read_input(FILE *input);
+void write_out(UArray2_T packed_image, int trimmed_width, int trimmed_height);
+UArray2_T read_input(FILE *input);
 
 #endif
