@@ -96,7 +96,7 @@ bool Bitpack_fitss(int64_t n, unsigned width)
  *      unsigned width:
  *      unsigned lsb:
  * 
- * Return: 
+ * Return: c
  *
  * Expects:
  *     

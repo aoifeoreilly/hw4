@@ -14,16 +14,16 @@
 #define COMPRESS_DECOMPRESS_H
 
 #include <stdio.h>
+#include <a2blocked.h>
+#include <bitpack.h>
 #include "pnm.h"
 #include "a2methods.h"
 #include "a2plain.h"
-#include <a2blocked.h>
 #include "assert.h"
 #include "trimPPM.h"
 #include "convert_comp_rgb.h"
 #include "block_unblock.h"
 #include "DCT_transform.h"
-#include <bitpack.h>
 #include "pack_unpack.h"
 #include "read_write.h"
 #define BLOCKSIZE 2

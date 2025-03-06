@@ -48,7 +48,7 @@ static void (*compress_or_decompress)(FILE *input) = compress40;
 int main(int argc, char *argv[])
 {
         int i;
-
+        
         for (i = 1; i < argc; i++) {
                 if (strcmp(argv[i], "-c") == 0) {
                         compress_or_decompress = compress40;
