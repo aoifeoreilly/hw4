@@ -158,17 +158,17 @@ void CVS_to_DCT_Apply(int col, int row, UArray2b_T averageCVS, void *elm,
  *      Will C.R.E if the new 2D blocked array is not allocated properly.
  * 
  ************************/
-UArray2b_T DCT_to_CVS(UArray2b_T DCT_array)
+UArray2b_T DCT_to_CVS(UArray2_T DCT_array)
 {
         assert(DCT_array != NULL);
-        UArray2b_T averageCVS = UArray2b_new(UArray2b_width(DCT_array),
-                                            UArray2b_height(DCT_array), 
+        UArray2b_T averageCVS = UArray2b_new(UArray2_width(DCT_array),
+                                            UArray2_height(DCT_array), 
                                             sizeof(struct AveragePixel),
                                             1);
         assert(averageCVS != NULL);
 
         /* Iterate through given array of CVS pixels */
-        UArray2b_map(DCT_array, DCT_to_CVS_Apply, averageCVS);
+        UArray2_map_row_major(DCT_array, DCT_to_CVS_Apply, averageCVS);
         return averageCVS;
 }
 
@@ -194,7 +194,7 @@ UArray2b_T DCT_to_CVS(UArray2b_T DCT_array)
  *      Will C.R.E. if the pointer arguments are passed in as NULL.
  * 
  ************************/
-void DCT_to_CVS_Apply(int col, int row, UArray2b_T DCT_array, void *elm, 
+void DCT_to_CVS_Apply(int col, int row, UArray2_T DCT_array, void *elm, 
                                                               void *cl)
 {
         (void)DCT_array;

@@ -47,8 +47,8 @@ void CVS_to_DCT_Apply(int col, int row, UArray2b_T averageCVS, void *elm,
 /******************************************
  *             DECOMPRESSION
 *******************************************/
-UArray2b_T DCT_to_CVS(UArray2b_T averageCVS);
-void DCT_to_CVS_Apply(int col, int row, UArray2b_T averageCVS, void *elm, 
+UArray2b_T DCT_to_CVS(UArray2_T DCT_array);
+void DCT_to_CVS_Apply(int col, int row, UArray2_T DCT_array, void *elm, 
                                                                void *cl);
 
 #endif

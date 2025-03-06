@@ -82,7 +82,7 @@ void pack_image_apply(int col, int row, UArray2b_T DCT_image, void *elem,
         /* Pack each value into the word casted as a 32-bit value */
         uint32_t *word = UArray2_at(packed_image, col, row);
         assert(word != NULL);
-
+        
         *word = Bitpack_newu(*word, 9, 23, curr_pixel->a);
         *word = Bitpack_news(*word, 5, 18, curr_pixel->b);
         *word = Bitpack_news(*word, 5, 13, curr_pixel->c);
@@ -111,13 +111,12 @@ void pack_image_apply(int col, int row, UArray2b_T DCT_image, void *elem,
  *      Will C.R.E. if the 2D array is not allocated correctly.
  * 
  ************************/
-UArray2b_T unpack_image(UArray2_T packed_image)
+UArray2_T unpack_image(UArray2_T packed_image)
 {
         assert(packed_image != NULL);
-        UArray2b_T DCT_image = UArray2b_new(UArray2_width(packed_image),
-                                            UArray2_height(packed_image), 
-                                            sizeof(struct DCT_Pixel),
-                                            1);
+        UArray2_T DCT_image = UArray2_new(UArray2_width(packed_image),
+                                          UArray2_height(packed_image), 
+                                          sizeof(struct DCT_Pixel));
         assert(DCT_image != NULL);
 
         /* Iterate through the array of DCT structs */
@@ -154,10 +153,10 @@ void unpack_image_apply(int col, int row, UArray2_T packed_image, void *elem,
         (void)packed_image;
         uint32_t *word = elem;
         assert(word != NULL);
-        UArray2b_T DCT_image = cl;
+        UArray2_T DCT_image = cl;
         assert(DCT_image != NULL);
 
-        struct DCT_Pixel *curr_pixel = UArray2b_at(DCT_image, col, row);
+        struct DCT_Pixel *curr_pixel = UArray2_at(DCT_image, col, row);
         assert(curr_pixel != NULL);
 
         curr_pixel->a = Bitpack_getu(*word, 9, 23);

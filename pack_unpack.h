@@ -32,7 +32,7 @@ void pack_image_apply(int col, int row, UArray2b_T DCT_image, void *elem,
 /******************************************
  *             DECOMPRESSION 
 *******************************************/
-UArray2b_T unpack_image(UArray2_T packed_image);
+UArray2_T unpack_image(UArray2_T packed_image);
 void unpack_image_apply(int col, int row, UArray2_T packed_image2, void *elem, 
                                                                    void *cl);
 
