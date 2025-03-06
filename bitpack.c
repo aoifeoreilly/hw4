@@ -18,8 +18,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include <except.h>
-#define LONG_1 0x0000000000000001
-#define LONG_64 0x0000000000000040
 
 Except_T Bitpack_Overflow = { "Overflow packing bits" };
 
@@ -46,17 +44,16 @@ Except_T Bitpack_Overflow = { "Overflow packing bits" };
 bool Bitpack_fitsu(uint64_t n, unsigned width)
 {
         /* Width must be less than 64-bits */
-        assert(width <= 64u);
+        assert((uint64_t)width <= (uint64_t)64);
 
-        if (width == 0) {
+        if ((uint64_t)width == (uint64_t)0) {
                 return false;
         }
-        if (width == 64u) {
+        if ((uint64_t)width == (uint64_t)64) {
                 return true;
         }
-        uint64_t max = LONG_1;
-        uint64_t shift = (max << width) - LONG_1;
-        return n <= shift;
+        uint64_t max = ((uint64_t)1 << width) - (uint64_t)1;
+        return n <= max;
 }
 
 /********** Bitpack_fitss ********
@@ -83,17 +80,17 @@ bool Bitpack_fitsu(uint64_t n, unsigned width)
 bool Bitpack_fitss(int64_t n, unsigned width)
 {
         /* Width must be less than 64-bits */
-        assert(width <= 64u);
+        assert((uint64_t)width <= (uint64_t)64);
 
         /* Width cannot be 0 bits. If width is 64 bits, all data should fit */
-        if (width == 0u) {
+        if ((uint64_t)width == (uint64_t)0) {
                 return false;
         }
-        if (width == 64u) {
+        if ((uint64_t)width == (uint64_t)64) {
                 return true;
         }
         /* Find the min and max values given width, and check to see if n fits*/
-        int64_t max = (LONG_1 << (width - LONG_1)) - LONG_1;
+        int64_t max = ((int64_t)1 << (width - (uint64_t)1)) - (uint64_t)1;
         int64_t min = ~max;
         return n <= max && n >= min;
 }
@@ -121,8 +118,8 @@ bool Bitpack_fitss(int64_t n, unsigned width)
 uint64_t Bitpack_getu(uint64_t word, unsigned width, unsigned lsb)
 {
         /* Width and sum of width and lsb both must be less than 64-bits */
-        assert(width + lsb <= LONG_64);
-        assert(width <= LONG_64);
+        assert((uint64_t)width + (uint64_t)lsb <= (uint64_t)64);
+        assert((uint64_t)width <= (uint64_t)64);
 
         /* If width is zero, there is no value to get */
         if (width == 0) {
@@ -130,7 +127,7 @@ uint64_t Bitpack_getu(uint64_t word, unsigned width, unsigned lsb)
         }
 
         /* Shift the mask to the correct position in the word */
-        uint64_t mask = ((LONG_1 << width) - LONG_1) << lsb;
+        uint64_t mask = (((uint64_t)1 << width) - (uint64_t)1) << lsb;
 
         /* Shift back to lsb and return the bits specified by user */
         return (word & mask) >> lsb;
@@ -159,22 +156,22 @@ uint64_t Bitpack_getu(uint64_t word, unsigned width, unsigned lsb)
 int64_t Bitpack_gets(uint64_t word, unsigned width, unsigned lsb)
 {
         /* Width and sum of width and lsb both must be less than 64-bits */
-        assert(width + lsb <= LONG_64);
-        assert(width <= LONG_64);
+        assert(width + lsb <= (uint64_t)64);
+        assert(width <= (uint64_t)64);
 
         /* If width is zero, there is no value to get */
         if (width == 0) {
                 return 0;
         }
         /* Position mask in correct space in the word */
-        uint64_t mask = ((LONG_1 << width) - LONG_1) << lsb;
+        uint64_t mask = (((uint64_t)1 << width) - (uint64_t)1) << lsb;
         
         /* Find bits specified by user and shift them to lsb of 64 bit word */
         int64_t value = (word & mask) >> lsb;
         
         /* If the number is signed, extend the sign */
-        if (value & (LONG_1 << (width - LONG_1))) {
-                value = value | ~(mask >> lsb);
+        if (value & ((uint64_t)1 << (width - (uint32_t)1))) {
+                value |= ~(mask >> lsb);
         }
 
         return value;
@@ -207,8 +204,8 @@ uint64_t Bitpack_newu(uint64_t word, unsigned width, unsigned lsb,
                                                      uint64_t value)
 {
         /* Width and sum of width and lsb both must be less than 64-bits */
-        assert(width + lsb <= LONG_64);
-        assert(width <= LONG_64);
+        assert(width + lsb <= (uint64_t)64);
+        assert(width <= (uint64_t)64);
 
         /* If the value does not fit in width unsigned bits */
         if (!Bitpack_fitsu(value, width)) {
@@ -216,7 +213,7 @@ uint64_t Bitpack_newu(uint64_t word, unsigned width, unsigned lsb,
         }
 
         /* Create mask for desired bits (using LONG_1 for 64-bit shifts) */
-        uint64_t mask = ((LONG_1 << width) - LONG_1) << lsb;
+        uint64_t mask = (((uint64_t)1 << width) - (uint64_t)1) << lsb;
 
         /* Clear desired bits */
         word &= ~mask;
@@ -253,8 +250,8 @@ uint64_t Bitpack_news(uint64_t word, unsigned width, unsigned lsb,
                                                      int64_t value)
 {
         /* Width and sum of width and lsb both must be less than 64-bits */
-        assert(width + lsb <= LONG_64);
-        assert(width <= LONG_64);
+        assert(width + lsb <= (uint64_t)64);
+        assert(width <= (uint64_t)64);
 
         /* If the value does not fit in width unsigned bits */
         if (!Bitpack_fitss(value, width)) {
@@ -262,14 +259,14 @@ uint64_t Bitpack_news(uint64_t word, unsigned width, unsigned lsb,
         }
 
         /* Create mask for desired bits */
-        uint64_t mask = ((LONG_1 << width) - LONG_1) << lsb;
+        uint64_t mask = (((uint64_t)1 << width) - (uint64_t)1) << lsb;
 
         /* Clear desired bits */
         word &= ~mask;
 
         /* Discard sign extended bits to not mess OR operation and set bits */
-        word |= (((uint64_t)value << (LONG_64 - width)) >> 
-                                     (LONG_64 - width)) << lsb;
+        word |= (((uint64_t)value << ((uint64_t)64 - width)) >> 
+                                     ((uint64_t)64 - width)) << lsb;
 
         return word;
 }

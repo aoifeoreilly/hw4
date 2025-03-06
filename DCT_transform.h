@@ -6,7 +6,9 @@
  *     Authors:    Griffin Faecher (gfaech01) and Aoife O'Reilly (aoreil02)
  *     Date:       3/4/2025
  *
- *     
+ *     Contains the function declarations to convert the pixels in a given 
+ *     array between component video space and their cosine coefficient 
+ *     equivalents using the discrete cosine transform and its inverse.
  *
  *************************************************************/
 
@@ -41,14 +43,14 @@ struct DCT_Pixel {
  *             COMPRESSION 
 *******************************************/
 UArray2b_T CVS_to_DCT(UArray2b_T averageCVS);
-void CVS_to_DCT_Apply(int col, int row, UArray2b_T averageCVS, void *elm, 
+void CVS_to_DCT_Apply(int col, int row, UArray2b_T averageCVS, void *elem, 
                                                                void *cl);
 
 /******************************************
  *             DECOMPRESSION
 *******************************************/
-UArray2b_T DCT_to_CVS(UArray2_T DCT_array);
-void DCT_to_CVS_Apply(int col, int row, UArray2_T DCT_array, void *elm, 
-                                                               void *cl);
+UArray2b_T DCT_to_CVS(UArray2b_T DCT_array);
+void DCT_to_CVS_Apply(int col, int row, UArray2b_T DCT_array, void *elem, 
+                                                              void *cl);
 
 #endif

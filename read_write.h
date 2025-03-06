@@ -24,6 +24,10 @@
 #include "compress_decompress.h"
 
 void write_out(UArray2_T packed_image, int trimmed_width, int trimmed_height);
+void write_out_apply(int col, int row, UArray2_T packed_image, void *elem, 
+                                                                void *cl);
 UArray2_T read_input(FILE *input);
+void read_input_apply(int col, int row, UArray2_T packed_image, void *elem, 
+                                                                void *cl);
 
 #endif

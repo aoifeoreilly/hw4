@@ -38,13 +38,13 @@
  ************************/
 UArray2b_T average4to1(UArray2b_T CVS_image)
 {
+        assert(CVS_image != NULL);
         /* Allocate new 2D blocked array to hold averaged CVS values */
         UArray2b_T averageCVS = UArray2b_new(
                                         UArray2b_width(CVS_image) / BLOCKSIZE,
                                         UArray2b_height(CVS_image) / BLOCKSIZE,
                                         sizeof(struct AveragePixel), 1);
         assert(averageCVS != NULL);
-        
         /* Iterate through the array of AveragePixel structs */
         UArray2b_map(averageCVS, average4to1Apply, CVS_image);
 
@@ -97,7 +97,7 @@ void average4to1Apply(int col, int row, UArray2b_T averageCVS, void *elm,
                         /* Get the CVS pixel at each pixel in the 2x2 block */
                         struct CompVidPixel *old_pixel = UArray2b_at(CVS_image, 
                                                 (col * BLOCKSIZE) + colOffset, 
-                                                (row * BLOCKSIZE) + colOffset);
+                                                (row * BLOCKSIZE) + rowOffset);
                         assert(old_pixel != NULL);
                         
                         /* Sum the Pb and Pr values in the 2x2 */

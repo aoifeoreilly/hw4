@@ -20,17 +20,17 @@
 /********** CVS_to_DCT ********
  *
  *  Converts the pixels in the given 2D blocked array from component video
- *  color space to the cosine coeffecients a, b, c, and d using the discrete 
+ *  color space to the cosine coefficients a, b, c, and d using the discrete 
  *  cosine transform. Pb and Pr remain the same.
  *
  * Parameters:
- *      UArray2b_T averageCVS:
+ *      UArray2b_T averageCVS: A 2D blocked array of CVS pixels.
  * 
  * Return: 
- *      A 2D blocked array 
+ *      A 2D blocked array of cosine coefficient pixels.
  *
  * Expects:
- *     A valid 2D blocked array.
+ *      A valid 2D blocked array.
  * 
  * Notes:
  *      Will C.R.E if the given UArray2b_T is not valid.
@@ -60,7 +60,11 @@ UArray2b_T CVS_to_DCT(UArray2b_T averageCVS)
  *  and 'd' to 5-bit signed integers using the discrete cosine transform.
  *
  * Parameters:
- *      UArray2b_T averageCVS: A 2D blocked array of 
+ *      int col   : The current column in the array of CVS pixels.
+ *      int row   : The current row in the array of CVS pixels.
+ *      UArray2_T averageCVS: The 2D array of CVS pixels.
+ *      void *elem: Pointer to each pixel in the 2D blocked CVS array.
+ *      void *cl  : Pointer to the 2D blocked DCT array.
  * 
  * Return: 
  *      None.
@@ -74,13 +78,13 @@ UArray2b_T CVS_to_DCT(UArray2b_T averageCVS)
  *      Will C.R.E. if the pointer arguments are passed in as NULL.
  * 
  ************************/
-void CVS_to_DCT_Apply(int col, int row, UArray2b_T averageCVS, void *elm, 
+void CVS_to_DCT_Apply(int col, int row, UArray2b_T averageCVS, void *elem, 
                                                                void *cl)
 {
         (void)averageCVS;
 
         /* Get the current pixel in the averaged CVS array */
-        struct AveragePixel *curr_pixel = elm;
+        struct AveragePixel *curr_pixel = elem;
         assert(curr_pixel != NULL);
 
         /* Get the new 2D blocked DCT array */
@@ -158,17 +162,17 @@ void CVS_to_DCT_Apply(int col, int row, UArray2b_T averageCVS, void *elm,
  *      Will C.R.E if the new 2D blocked array is not allocated properly.
  * 
  ************************/
-UArray2b_T DCT_to_CVS(UArray2_T DCT_array)
+UArray2b_T DCT_to_CVS(UArray2b_T DCT_array)
 {
         assert(DCT_array != NULL);
-        UArray2b_T averageCVS = UArray2b_new(UArray2_width(DCT_array),
-                                            UArray2_height(DCT_array), 
+        UArray2b_T averageCVS = UArray2b_new(UArray2b_width(DCT_array),
+                                            UArray2b_height(DCT_array), 
                                             sizeof(struct AveragePixel),
                                             1);
         assert(averageCVS != NULL);
 
         /* Iterate through given array of CVS pixels */
-        UArray2_map_row_major(DCT_array, DCT_to_CVS_Apply, averageCVS);
+        UArray2b_map(DCT_array, DCT_to_CVS_Apply, averageCVS);
         return averageCVS;
 }
 
@@ -179,8 +183,12 @@ UArray2b_T DCT_to_CVS(UArray2_T DCT_array)
  *  the inverse discrete cosine transform.
  *
  * Parameters:
- *      UArray2b_T DCT_array: A 2D blocked array of cosine coefficient
+ *      int col   : The current column in the array of DCT pixels.
+ *      int row   : The current row in the array of DCT pixels.
+ *      UArray2_T DCT_array: A 2D blocked array of cosine coefficient
  *                            elements.
+ *      void *elem: Pointer to each pixel in the 2D blocked DCT array.
+ *      void *cl  : Pointer to the 2D blocked CVS array.
  * 
  * Return: 
  *      None.
@@ -194,11 +202,11 @@ UArray2b_T DCT_to_CVS(UArray2_T DCT_array)
  *      Will C.R.E. if the pointer arguments are passed in as NULL.
  * 
  ************************/
-void DCT_to_CVS_Apply(int col, int row, UArray2_T DCT_array, void *elm, 
+void DCT_to_CVS_Apply(int col, int row, UArray2b_T DCT_array, void *elem, 
                                                               void *cl)
 {
         (void)DCT_array;
-        struct DCT_Pixel *curr_pixel = elm;
+        struct DCT_Pixel *curr_pixel = elem;
         assert(curr_pixel != NULL);
         UArray2b_T averageCVS = cl;
         assert(averageCVS != NULL);

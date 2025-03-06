@@ -6,7 +6,8 @@
  *      Edited by:  Aoife O'Reilly (aoreil02) and Griffin Faecher (gfaech01)
  *      Date:       2/28/2025
  *
- *      TODO
+ *      Converts pixels from RGB color space (R, G, B) to and from component
+ *      video color space (Y, Pb, and Pr).
  *
  **********************************************************/
 
@@ -18,19 +19,20 @@
  * video color space.
  *
  * Parameters:
- *      A2Methods_T trimmed_image : trimmed array containing RGB pixels
- *      unsigned denominator      : the maximum value of the given ppm_image
+ *      UArray2b_T trimmed_image : Trimmed array containing RGB pixels.
+ *      unsigned denominator     : The maximum value of the given ppm_image.
  * 
  * Return:
- *      A2Methods_T: The array with all of its pixels in component video 
- *                   color space.
+ *      UArray2b_T: 2D blocked array with all of its pixels in component video 
+ *                  color space.
  *
  * Expects:
- *      The given array not to be NULL.
+ *      The given array to be valid.
  *
  * Notes:
  *      Converts unsigned values to a floating-point representation.
- *     
+ *      Will C.R.E. if the provided array is NULL.
+ *
  ************************/
 UArray2b_T rgbToCompVid(UArray2b_T trimmed_image, unsigned denominator) 
 {
@@ -41,12 +43,12 @@ UArray2b_T rgbToCompVid(UArray2b_T trimmed_image, unsigned denominator)
                 trimmed_image,
                 denominator
         };
-        
 
+        /* Allocate new 2D blocked array to hold the CVS pixels */
         UArray2b_T CVS_image = UArray2b_new(UArray2b_width(trimmed_image),
-                                        UArray2b_height(trimmed_image), 
-                                        sizeof(struct CompVidPixel),
-                                        BLOCKSIZE);
+                                            UArray2b_height(trimmed_image), 
+                                            sizeof(struct CompVidPixel),
+                                            BLOCKSIZE);
         
         /* Visit every cell in CVS_image and call the apply function */
         UArray2b_map(CVS_image, rgbToCompVidApply, &cl);
@@ -56,23 +58,28 @@ UArray2b_T rgbToCompVid(UArray2b_T trimmed_image, unsigned denominator)
 
 /********** rgbToCompVidApply ********
  *
- * 
+ * Apply function to help get the current CVS pixel, convert to RGB values to 
+ * floats, and calculate values for Y, Pb, and Pr.
  *
  * Parameters:
- *      int col                   : The current column index in the given image.
- *      int row                   : The current row index in the given image.
- *      A2Methods_Object *array2d :
- *      void *elem                :
- *      void *cl                  : A pointer to a struct containing the
- *                                  trimmed image array and image denominator.
+ *      int col             : The current column index in the given image.
+ *      int row             : The current row index in the given image.
+ *      UArray2b_T *array2b : 2D blocked array to 
+ *      void *elem          : Pointer to a struct containing the CVS pixel
+                              elements.
+ *      void *cl            : Pointer to a struct containing the
+ *                            trimmed image array and image denominator.
  * 
  * Return:
- *      None
+ *      None.
  *
  * Expects:
- *      A valid A2Methods_T image and a properly initialized closure struct.
+ *      A valid UArray2b_T array.
+ *      Properly initialized element and closure pointers.
  *
  * Notes:
+ *      Clamps Y, Pb, and Pr so that they remain in bounds.
+ *      Will C.R.E. if the pointer arguments are passed in as NULL.
  *     
  ************************/
 void rgbToCompVidApply(int col, int row, UArray2b_T array2b, void *elem, 
@@ -82,10 +89,15 @@ void rgbToCompVidApply(int col, int row, UArray2b_T array2b, void *elem,
 
         /* Get the current CVS pixel (struct containing Y, Pb, Pr) */
         struct CompVidPixel *curr_CVS_pixel = elem;
+        assert(curr_CVS_pixel != NULL);
 
         /* Extract trimmed image and denominator from closure */
         struct RGB_CVS_Closure *closure = cl;
+        assert(closure != NULL);
+
         UArray2b_T trimmed_image = closure->image;
+        assert(trimmed_image != NULL);
+
         unsigned denominator = closure->denominator;
         
         /* Get each RGB pixel from the trimmed image */
@@ -129,23 +141,33 @@ void rgbToCompVidApply(int col, int row, UArray2b_T array2b, void *elem,
 
 /********** CompVidtoRGB ********
  *
- * 
+ * Transforms each pixel in the given array from component video color space
+ * to RGB space.
  *
  * Parameters:
- *      A2Methods_T CVS_image :
- *      unsigned denominator  : 
+ *      UArray2b_T CVS_image : 2D blocked array containing pixels in component
+                               video color space.
+ *      A2Methods_T methods  : Methods interface for manipulating the image.
+ *      unsigned denominator : The max val of the ppm image.
+ *
  * Return:
- *      Pnm_ppm:
+ *      Pnm_ppm: A ppm image with pixels in RGB space.
  *
  * Expects:
+ *      A valid 2D blocked array and methods interface.
+        A valid unsigned denominator value.
  *
  * Notes:
+ *      Allocates a ppm image with information from the given CVS array.
+ *      Will C.R.E if the new Pnm_ppm is allocated incorrectly. 
  *     
  ************************/
-Pnm_ppm CompVidtoRGB(UArray2b_T CVS_image, A2Methods_T methods, unsigned denominator)
+Pnm_ppm CompVidtoRGB(UArray2b_T CVS_image, A2Methods_T methods, 
+                                           unsigned denominator)
 {
-        /* Initialize a ppm struct with information from the given CVS_image */
+        /* Initialize a ppm image with information from the given CVS_image */
         Pnm_ppm ppm_image = malloc(sizeof(*ppm_image));
+        assert(ppm_image != NULL);
 
         ppm_image->width = UArray2b_width(CVS_image);
         ppm_image->height = UArray2b_height(CVS_image);
@@ -160,6 +182,7 @@ Pnm_ppm CompVidtoRGB(UArray2b_T CVS_image, A2Methods_T methods, unsigned denomin
                 CVS_image,
                 denominator
         };
+
         /* Visit every cell in the ppm_image pixmap and call apply function */
         UArray2b_map(ppm_image->pixels, CompVidtoRGBApply, &cl);
         return ppm_image;
@@ -167,24 +190,27 @@ Pnm_ppm CompVidtoRGB(UArray2b_T CVS_image, A2Methods_T methods, unsigned denomin
 
 /********** CompVidtoRGBApply ********
  *
- * 
+ * Apply function to help get each CVS pixel from the trimmed image and
+ * convert to RGB space.
  *
  * Parameters:
- *      int col                   : The current column index in the given image.
- *      int row                   : The current row index in the given image.
- *      A2Methods_Object *array2d :
- *      void *elem                :
- *      void *cl                  : A pointer to a struct containing the
- *                                  trimmed image array and image denominator.
+ *      int col             : The current column index in the given image.
+ *      int row             : The current row index in the given image.
+ *      UArray2b_T *array2b : 2D blocked array of ppm pixels.
+ *      void *elem          : Pointer to a struct containing RGB pixels.
+ *      void *cl            : Pointer to a struct containing the
+ *                            trimmed image array and image denominator.
  * 
  * Return:
  *      None.
  *
  * Expects:
- *      A valid A2Methods_T image and a properly initialized closure struct.
+ *      A valid 2D blocked array and a properly initialized closure struct.
  * 
  * Notes:
- *     
+ *      Clamps the signed values between 0 and 255.
+ *      Will C.R.E. if the provided array is NULL.
+ *
  ************************/
 void CompVidtoRGBApply(int col, int row, UArray2b_T array2b, void *elem, 
                        void *cl)
@@ -193,18 +219,23 @@ void CompVidtoRGBApply(int col, int row, UArray2b_T array2b, void *elem,
 
         /* Get the current RGB pixel (struct containing R, G, B) */
         struct Pnm_rgb *curr_RGB_pixel = elem;
+        assert(curr_RGB_pixel != NULL);
 
         /* Extract CVS image and chosen denominator from closure */
         struct RGB_CVS_Closure *closure = cl;
+        assert(closure != NULL);
         UArray2b_T CVS_image = closure->image;
         unsigned denominator = closure->denominator;
 
         /* Get each CVS pixel from the trimmed image */
         struct CompVidPixel *curr_CVS_pixel = UArray2b_at(CVS_image, col, row);
+        assert(curr_CVS_pixel != NULL);
+
         float Y  = curr_CVS_pixel->Y;
         float Pb = curr_CVS_pixel->Pb;
         float Pr = curr_CVS_pixel->Pr;
 
+        /* Convert to signed values */
         signed red_signed = (signed)(((1.0 * Y) + (0.0 * Pb) + 
                                       (1.402 * Pr)) * denominator);
 
@@ -233,6 +264,7 @@ void CompVidtoRGBApply(int col, int row, UArray2b_T array2b, void *elem,
                 blue_signed = 255;
         }
         
+        /* Set RGB values */
         curr_RGB_pixel->red = (unsigned)red_signed;
         curr_RGB_pixel->green = (unsigned)green_signed;
         curr_RGB_pixel->blue = (unsigned)blue_signed;

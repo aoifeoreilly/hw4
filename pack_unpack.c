@@ -19,8 +19,8 @@
  *  code words using the Bitpack interface.
  *
  * Parameters:
- *      UArray2b_T DCT_image: A 2D blocked array of local variables a, b, c, d, 
- *                            Pb_avg, and Pr_avg.
+ *      UArray2b_T DCT_image: A 2D blocked array of local variables
+ *                            a, b, c, d, Pb_avg, and Pr_avg.
  * 
  * Return: 
  *      A 2D array of 32-bit code words.
@@ -97,26 +97,26 @@ void pack_image_apply(int col, int row, UArray2b_T DCT_image, void *elem,
  *  values into local variables.
  *
  * Parameters:
- *      UArray2b_T packed_image:
+ *      UArray2_T packed_image: 2D array of 32-bit code words.
  * 
  * Return: 
  *      A 2D blocked array of local variables.
  *
  * Expects:
- *     A valid 2D array of codewords.
+ *     A valid 2D array of code words.
  * 
  * Notes:
  *      Allocates a new 2D blocked array to store the local variables.
- *      Will C.R.E. if the 2D blocked array is not valid.
- *      Will C.R.E. if the 2D array is not allocated correctly.
+ *      Will C.R.E. if the 2D array is not valid.
+ *      Will C.R.E. if the 2D blocked array is not allocated correctly.
  * 
  ************************/
-UArray2_T unpack_image(UArray2_T packed_image)
+UArray2b_T unpack_image(UArray2_T packed_image)
 {
         assert(packed_image != NULL);
-        UArray2_T DCT_image = UArray2_new(UArray2_width(packed_image),
+        UArray2b_T DCT_image = UArray2b_new(UArray2_width(packed_image),
                                           UArray2_height(packed_image), 
-                                          sizeof(struct DCT_Pixel));
+                                          sizeof(struct DCT_Pixel), 1);
         assert(DCT_image != NULL);
 
         /* Iterate through the array of DCT structs */
@@ -153,10 +153,10 @@ void unpack_image_apply(int col, int row, UArray2_T packed_image, void *elem,
         (void)packed_image;
         uint32_t *word = elem;
         assert(word != NULL);
-        UArray2_T DCT_image = cl;
+        UArray2b_T DCT_image = cl;
         assert(DCT_image != NULL);
 
-        struct DCT_Pixel *curr_pixel = UArray2_at(DCT_image, col, row);
+        struct DCT_Pixel *curr_pixel = UArray2b_at(DCT_image, col, row);
         assert(curr_pixel != NULL);
 
         curr_pixel->a = Bitpack_getu(*word, 9, 23);

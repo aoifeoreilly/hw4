@@ -58,8 +58,8 @@ void compress40(FILE *input)
         /* Compression Step #3: Convert RGB values to comp video color format */
         UArray2b_T CVS_image = rgbToCompVid(trimmed_image, denominator);
         assert(CVS_image != NULL);
-        // int trimmed_width = UArray2b_width(trimmed_image);
-        // int trimmed_height = UArray2b_height(trimmed_image);
+        int trimmed_width = UArray2b_width(trimmed_image);
+        int trimmed_height = UArray2b_height(trimmed_image);
         UArray2b_free(&trimmed_image);
         
         /* Compression Step #4: Average value the chroma elements in every 
@@ -78,37 +78,9 @@ void compress40(FILE *input)
         assert(packed_image != NULL);
         UArray2b_free(&DCT_image);
 
-        /* MEEBUMBOOOO */
-
-        UArray2_T DCT_image2 = unpack_image(packed_image);
-        assert(DCT_image2 != NULL);
+        /* Compression Step #7: Write compressed image to standard output */
+        write_out(packed_image, trimmed_width, trimmed_height);
         UArray2_free(&packed_image);
-
-        /* Decompression Step #4: Use inverse DCT to compute Y1, Y2, Y3, Y4 */
-        UArray2b_T averaged_image2 = DCT_to_CVS(DCT_image2);
-        assert(averaged_image2 != NULL);
-        UArray2_free(&DCT_image2);
-
-        /* Decompression Step #5: Expand each pixel to 2-by-2 block and quantize
-           RGB values to integers in a range corresponding to our denominator */
-        UArray2b_T CVS_image2 = average1to4(averaged_image2);
-        assert(CVS_image2 != NULL);
-        UArray2b_free(&averaged_image2);
-
-        /* Decompression Step #6: Transform CVS to RGB */
-        Pnm_ppm ppm_image2 = CompVidtoRGB(CVS_image2, methods, DENOMINATOR);
-        assert(ppm_image2 != NULL);
-        UArray2b_free(&CVS_image2);
-
-        /* Decompression Step #7: Write uncompressed image to standard output */
-        Pnm_ppmwrite(stdout, ppm_image2);
-        Pnm_ppmfree(&ppm_image2);
-        
-        
-        
-        // /* Compression Step #7: Write compressed image to standard output */
-        // write_out(packed_image, trimmed_width, trimmed_height);
-        // UArray2_free(&packed_image);
 }
 
 /********** decompression ********
@@ -139,14 +111,14 @@ void decompress40(FILE *input)
 
         /* Decompression Step #2: For each code word, unpack a, b, c, d, PB, 
                                   and PR into local variables */
-        UArray2_T DCT_image = unpack_image(packed_image);
+        UArray2b_T DCT_image = unpack_image(packed_image);
         assert(DCT_image != NULL);
         UArray2_free(&packed_image);
 
         /* Decompression Step #4: Use inverse DCT to compute Y1, Y2, Y3, Y4 */
         UArray2b_T averaged_image = DCT_to_CVS(DCT_image);
         assert(averaged_image != NULL);
-        UArray2_free(&DCT_image);
+        UArray2b_free(&DCT_image);
 
         /* Decompression Step #5: Expand each pixel to 2-by-2 block and quantize
            RGB values to integers in a range corresponding to our denominator */

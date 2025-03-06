@@ -27,9 +27,9 @@
  * This structure represents a component video color space pixel.
  *
  * Elements:
- *      float Y  : represents the brightness of a color
- *      float Pb : color-difference signal proportional to Blue − Yellow
- *      float Pr : color-difference signal proportional to Red − Yellow
+ *      float Y  : represents the brightness of a color.
+ *      float Pb : color-difference signal proportional to Blue - Yellow.
+ *      float Pr : color-difference signal proportional to Red - Yellow.
  * 
  ************************/
 struct CompVidPixel {
@@ -44,11 +44,11 @@ struct CompVidPixel {
  * specified apply function.
  *
  * Elements:
- *      A2Methods_T image    : For compression   - image represents the trimmed 
- *                                           array containing RGB pixels
+ *      A2Methods_T image    : For compression   - image represents the trimmed
+ *                                                 array containing RGB pixels.
  *                             For decompression - image represents the CVS 
- *                                           array containing CompVidPixels
- *      unsigned denominator : the maximum value of the image 
+ *                                              array containing CompVidPixels.
+ *      unsigned denominator : the maximum value of the image.
  * 
  ************************/
 struct RGB_CVS_Closure {
@@ -66,7 +66,8 @@ void rgbToCompVidApply(int col, int row, UArray2b_T array2b, void *elem,
 /******************************************
  *             DECOMPRESSION
 *******************************************/
-Pnm_ppm CompVidtoRGB(UArray2b_T CVS_image, A2Methods_T methods, unsigned denominator);
+Pnm_ppm CompVidtoRGB(UArray2b_T CVS_image, A2Methods_T methods, unsigned 
+                                                                denominator);
 void CompVidtoRGBApply(int col, int row, UArray2b_T array2b, void *elem, 
                        void *cl);
 

@@ -49,8 +49,6 @@ UArray2b_T trimPPM(Pnm_ppm ppm_image)
                 width = width - 1;
         } else if (height % 2 != 0 && width % 2 == 0) {
                 height = height - 1;
-        } else {
-                return ppm_image->pixels;
         }
         UArray2b_T trimmed_image = UArray2b_new(width, height, 
                                         sizeof(struct Pnm_rgb),
