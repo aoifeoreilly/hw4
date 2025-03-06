@@ -21,6 +21,6 @@
 #include "compress_decompress.h"
 
 void write(UArray2b_T packed_image, int trimmed_width, int trimmed_height);
-UArray2b_T read(FILE *input);
+UArray2b_T read_input(FILE *input);
 
 #endif

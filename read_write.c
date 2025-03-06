@@ -32,14 +32,19 @@
  ************************/
 void write(UArray2b_T packed_image, int trimmed_width, int trimmed_height)
 {
+        (void)packed_image;
+
         /* Write the header followed by a newline */
-        printf("COMP40 Compressed image format 2\n%u %u", trimmed_width, trimmed_height);
+        printf("COMP40 Compressed image format 2\n%u %u", trimmed_width, 
+                                                          trimmed_height);
         printf("\n");
 
         for (int row = 0; row < UArray2b_height(packed_image); row++) {
                 for (int col = 0; col < UArray2b_width(packed_image); col++) {
                         uint32_t *word = UArray2b_at(packed_image, col, row);
-                        
+                        // for (int i = 0; i < 4; i++) {
+                        //         putchar(Bitpack_getu(*word, 8, 24 - (i * 8)));
+                        // }
                         /* Get each byte in the 32-bit code word */
                         unsigned byte1 = Bitpack_getu(*word, 8, 24);
                         signed byte2 = Bitpack_getu(*word, 8, 16);
@@ -68,41 +73,42 @@ void write(UArray2b_T packed_image, int trimmed_width, int trimmed_height)
  * Notes:
  *     
  ************************/
-UArray2b_T read(FILE *input)
+UArray2b_T read_input(FILE *input)
 {
         (void)input;
-        /* Read the header of the compressed file using fscanf */
-        // unsigned height, width;
-        // int read = fscanf(input, "COMP40 Compressed image format 2\n%u %u", &width, &height);
-        // assert(read == 2);
-        // int c = getc(input);
-        // assert(c == '\n');
+        // /* Read the header of the compressed file using fscanf */
+        unsigned height, width;
+        int read = fscanf(input, "COMP40 Compressed image format 2\n%u %u", &width, &height);
+        (void)read;
+        assert(read == 2);
+        int c = getc(input);
+        assert(c == '\n');
 
         /* Allocate a 2D array of pixels of the given width and height */
-        // UArray2b_T packed_image = UArray2b_new(width / BLOCKSIZE, 
-        //                                        height / BLOCKSIZE, 
-        //                                        sizeof(uint32_t),
-        //                                        BLOCKSIZE);
-        // assert(packed_image != NULL);
+        UArray2b_T packed_image = UArray2b_new(width / BLOCKSIZE, 
+                                               height / BLOCKSIZE, 
+                                               sizeof(uint32_t),
+                                               BLOCKSIZE);
+        assert(packed_image != NULL);
 
-        // /* Place the array, width, height, and denominator in local variable */
-        // for (int row = 0; row < UArray2b_height(packed_image) / BLOCKSIZE; row++) {
-        //         for (int col = 0; col < UArray2b_width(packed_image) / BLOCKSIZE; col++) {
-        //                 /* Get a pointer to each element in packed_image */
-        //                 uint32_t *word = UArray2b_at(packed_image, col, row);
-        //                 (void)word;
-        //                 /* Use getc to read a single character from the given 
-        //                 file stream in big endian order (MSB first) */
-        //                 int byte1 = getc(input);
-        //                 int byte2 = getc(input);
-        //                 int byte3 = getc(input);
-        //                 int byte4 = getc(input);    
+        /* Place the array, width, height, and denominator in local variable */
+        for (int row = 0; row < UArray2b_height(packed_image) / BLOCKSIZE; row++) {
+                for (int col = 0; col < UArray2b_width(packed_image) / BLOCKSIZE; col++) {
+                        /* Get a pointer to each element in packed_image */
+                        uint32_t *word = UArray2b_at(packed_image, col, row);
+                        (void)word;
+                        /* Use getc to read a single character from the given 
+                        file stream in big endian order (MSB first) */
+                        int byte1 = getc(input);
+                        int byte2 = getc(input);
+                        int byte3 = getc(input);
+                        int byte4 = getc(input);    
 
-        //                 *word = Bitpack_newu(*word, 8, 24, byte1);
-        //                 *word = Bitpack_newu(*word, 8, 16, byte2);
-        //                 *word = Bitpack_newu(*word, 8, 8, byte3);
-        //                 *word = Bitpack_newu(*word, 8, 0, byte4);      
-        //         }
-        // }
-        return NULL;
+                        *word = Bitpack_newu(*word, 8, 24, byte1);
+                        *word = Bitpack_newu(*word, 8, 16, byte2);
+                        *word = Bitpack_newu(*word, 8, 8, byte3);
+                        *word = Bitpack_newu(*word, 8, 0, byte4);      
+                }
+        }
+        return packed_image;
 }

@@ -37,7 +37,7 @@ void compress40(FILE *input)
         assert(methods != NULL);
         // A2Methods_mapfun *map = methods->map_default; 
         // assert(map != NULL);
-         
+        
         /* Compression Step #1: Read in the ppm image */
         Pnm_ppm ppm_image = Pnm_ppmread(input, methods);
         assert(ppm_image != NULL);
@@ -48,14 +48,12 @@ void compress40(FILE *input)
         UArray2b_T trimmed_image = trimPPM(ppm_image);
         assert(trimmed_image != NULL);
         Pnm_ppmfree(&ppm_image);
-
         /* Compression Step #3: Convert RGB values to comp video color format */
         UArray2b_T CVS_image = rgbToCompVid(trimmed_image, denominator);
         assert(CVS_image != NULL);
         int trimmed_width = UArray2b_width(trimmed_image);
         int trimmed_height = UArray2b_height(trimmed_image);
         UArray2b_free(&trimmed_image);
-
         /* Compression Step #4: Average value the chroma elements in every 
            four pixel block and convert to 4-bit quantized representation */
         UArray2b_T averaged_image = average4to1(CVS_image);
@@ -98,8 +96,7 @@ void decompress40(FILE *input)
         assert(input != NULL);  
         
         /* Decompression Step #1: Read the header of the compressed file */
-        UArray2b_T packed_image = read(input);
-        assert(packed_image != NULL);
+        UArray2b_T packed_image = read_input(input);
 
         /* Decompression Step #2: For each code word, unpack a, b, c, d, PB, 
                                   and PR into local variables */

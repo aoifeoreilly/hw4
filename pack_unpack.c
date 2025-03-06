@@ -17,7 +17,7 @@ UArray2b_T pack_image(UArray2b_T DCT_image)
         assert(DCT_image != NULL);
         UArray2b_T packed_image = UArray2b_new(UArray2b_width(DCT_image),
                                                 UArray2b_height(DCT_image), 
-                                                sizeof(uint32_t), 2);
+                                                sizeof(uint32_t), BLOCKSIZE);
         assert(packed_image != NULL);
         UArray2b_map(DCT_image, pack_image_apply, packed_image);
         
