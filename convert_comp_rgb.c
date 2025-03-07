@@ -32,6 +32,7 @@
  * Notes:
  *      Converts unsigned values to a floating-point representation.
  *      Will C.R.E. if the provided array is NULL.
+ *      Allocates a new 2D blocked array to store the CVS pixels.
  *
  ************************/
 UArray2b_T rgbToCompVid(UArray2b_T trimmed_image, unsigned denominator) 

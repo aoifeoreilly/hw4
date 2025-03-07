@@ -89,7 +89,7 @@ bool Bitpack_fitss(int64_t n, unsigned width)
         if ((uint64_t)width == (uint64_t)64) {
                 return true;
         }
-        /* Find the min and max values given width, and check to see if n fits*/
+        /* Find min and max values given width, and check to see if n fits */
         int64_t max = ((int64_t)1 << (width - (uint64_t)1)) - (uint64_t)1;
         int64_t min = ~max;
         return n <= max && n >= min;

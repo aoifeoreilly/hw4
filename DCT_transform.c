@@ -34,7 +34,7 @@
  * 
  * Notes:
  *      Will C.R.E if the given UArray2b_T is not valid.
- *      Allocates a new 2D blocked array.
+ *      Allocates a new 2D blocked array to store the DCT pixels.
  *      Will C.R.E if the new 2D blocked array is not allocated properly.
  * 
  ************************/
@@ -158,7 +158,7 @@ void CVS_to_DCT_Apply(int col, int row, UArray2b_T averageCVS, void *elem,
  * 
  * Notes:
  *      Will C.R.E if the given UArray2b_T is not valid.
- *      Allocates a new 2D blocked array.
+ *      Allocates a new 2D blocked array to store the CVS pixels.
  *      Will C.R.E if the new 2D blocked array is not allocated properly.
  * 
  ************************/

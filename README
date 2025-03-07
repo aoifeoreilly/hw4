@@ -9,84 +9,106 @@
 *************************************************************************/
 
 Acknowledgements
-------------
+----------------
 
     TAs: Bill, Milo, Moses, Michael, Max
 
 
 What has been correctly implemented and what has not
-------------
+----------------------------------------------------
     
     Correct: As far as we know, everything has been implemented correctly. All
-    parts of our program work as intended
+             parts of our program work as intended.
 
     Incorrect: As far as we know, there are no bugs in our program.
                
 
 Architecture
 ------------
-40image.c
-Handles command-line arguments to either compress or decompress PPM images. It
-uses compress40 and decompress40 functions to convert images to a compressed
-binary format or restore them to their original state.
 
-a2blocked.c & a2plain.c: Provide method suites for 2D arrays with blocked and
-plain memory layouts respectively. a2blocked.c optimizes cache usage by storing
+40image.c:
+Handles command-line arguments to either compress or decompress PPM images. It
+uses a function pointer that points to either the compress40 or decompress40
+functions. The compress40 function is used to convert images to compressed 
+binary format. The decompress40 function is used to restore images back them to 
+their original state.
+
+a2blocked.c & a2plain.c:
+Provide method suites for 2D arrays with blocked and plain memory layouts 
+respectively. a2blocked.c optimizes cache usage by storing
 elements in blocks, while a2plain.c stores elements in row-major order.
 
-bitpack.c: Implements bit-level operations for packing and unpacking data into
+uarray2.c & uarray2.h: 
+Implements a 2D unboxed array using a 1D array as the underlying storage. 
+
+uarray2b.c: 
+Builds on uarray2.c by implementing blocked 2D arrays to enhance cache 
+efficiency. It supports functions for accessing elements, managing memory,
+and applying functions over elements in a block-major order.
+
+bitpack.c: 
+Implements bit-level operations for packing and unpacking data into
 64-bit words. It ensures proper logical operation excecution by casting
 immedaites to appropriate sizes before operations. Exceptions are raised if the
 data does not fit within the specified bit width.
 
-block_unblock.c: Converts groups of four pixels (in component video
-representation) into a single representation with Y1, Y2, Y3, and Y4 values
-along with Pb and Pr averages and vice versa. This step utilizes blocked 2d 
-arrays to organize both input and output images. 
+block_unblock.c: 
+Converts groups of four pixels (in component video representation) into a 
+single representation with Y1, Y2, Y3, and Y4 values along with Pb and Pr 
+averages and vice versa. This step utilizes blocked 2d arrays to organize both 
+input and output images. In compression it takes the average value of the four 
+CVS pixels in the block just for the Pb and Pr (chroma) elements of the pixels. 
+This file also quantizes all of the values. In decompression, it expands each 
+element in the averaged array to a 2x2 block in a new array by setting the 
+correspoonding Y values and converting the chroma elements back to floats.
 
-compress_decompress.c: Coordinates the entire compression and decompression
-process, including reading PPM files, converting color spaces, performing DCT,
-and managing packing and unpacking of codewords.
+compress_decompress.c: 
+Coordinates the entire compression and decompression process, including reading 
+PPM files, converting color spaces, performing DCT, and managing packing and 
+unpacking of codewords.
 
-convert_comp_rgb.c: Contains functions to convert between RGB and YPbPr
-(component video) color spaces. It ensures proper clamping of values to prevent
-overflow or underflow during conversion.
+convert_comp_rgb.c: 
+Contains functions to convert between RGB space and component video color space 
+(Y, Pb, Pr). It ensures proper clamping of values to prevent overflow or 
+underflow during conversion. In compression, it allocates a new 2D blocked array
+to store the CVS pixels. In decompression, it allocates a ppm image with 
+information from the given CVS array. 
 
-DCT_transform.c: Converts pixel data to and from discrete
-cosine transform (DCT) coefficients. DCT_transform.h defines the structures and
-functions for this process, ensuring accurate transformation and inverse
-transformation between component video space and DCT coefficients.
+DCT_transform.c: 
+Converts the pixels of the given image between component video color space and 
+their discrete cosine transform equivalents. Transforms the float values into 
+signed and unsigned integers and vice versa. In compression, it allocates a new
+2D blocked array to store the DCT pixels. In decompression, it allocates a new
+2D blocked array to store the CVS pixels.
 
-pack_unpack.c: Manages packing DCT coefficients and color
-information into 32-bit codewords for efficient storage and unpacking them back
-into meaningful data. pack_unpack.h defines the necessary interfaces for these
-operations.
+pack_unpack.c: 
+Manages the packing and unpacking of the pixel elements a, b, c, d, PB, and PR 
+between local variables and 32-bit code words. In compression, allocates a new 
+2D array to store the 32-bit codewords. In decompression, allocates a new 2D 
+array to store the local variables.
 
-ppmdiff.c: Compares two PPM images by calculating the root mean
-square (RMS) difference between them, providing a quantitative measure of
-compression quality. ppmdiff.h defines the functions for reading files and
-performing comparisons.
+ppmdiff.c: 
+Compares two PPM images by calculating the root mean square (RMS) difference 
+between them, providing a quantitative measure of compression quality.
 
-read_write.c: Handles reading and writing compressed binary
-images to and from standard output. read_write.h contains function declarations
-for reading input files, writing output files, and handling big-endian order.
+read_write.c: 
+Handles reading and writing compressed binary images to and from standard 
+output. Reads and prints the byte of the image to standard output in big 
+endian order (meaning most significant byte first).
 
-trimPPM.c: Ensures the dimensions of PPM images are even by trimming
-the last row or column if necessary. trimPPM.h provides the interface for this
-functionality.
+trimPPM.c: 
+Ensures the dimensions of PPM images are even by trimming the last row or 
+column if necessary. This file takes in a full-color portable pixmap image
+and produces a 2D blocked array containing the pixels of the image stored in 
+an RGB struct after possibly being trimmed.
 
-uarray2.c & uarray2.h: Implements a 2D unboxed array using a 1D array as the
-underlying storage. uarray2.h provides function declarations for creating,
-freeing, and manipulating these 2D arrays.
 
-uarray2b.c: Builds on uarray2.c by implementing blocked 2D arrays to enhance
-cache efficiency. It supports functions for accessing elements, managing memory,
-and applying functions over elements in a block-major order.
 
 Time Spent Analyzing the Problems 
------------
+---------------------------------
 We spent approximately 6 hours analyzing the problems in this assignment.
 
+
 Time Spent Solving the Problems 
------------
+-------------------------------
 We spent approximately 20 hours solving the problems in this assignment.

@@ -7,7 +7,7 @@
  *      Date:       3/5/2025
  *
  *      This file packs and unpacks a, b, c, d, PB, and PR between local 
- *      variables and a 32-bit code words.
+ *      variables and 32-bit code words.
  *
  *************************************************************/
 

@@ -31,7 +31,7 @@
  *     A valid 2D blocked array.
  * 
  * Notes:
- *      Prints the byte of the image to standard output in big endian order.
+ *     Prints the byte of the image to standard output in big endian order.
  *     
  ************************/
 void write_out(UArray2_T packed_image, int trimmed_width, int trimmed_height)
