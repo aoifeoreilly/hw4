@@ -32,7 +32,7 @@ INCLUDES = $(shell echo *.h)
 
 ############### Rules ###############
 
-all: ppmdiff 40image
+all: ppmdiff 40image-6
 
 ## Compile step (.c files -> .o files)
 
@@ -46,7 +46,7 @@ all: ppmdiff 40image
 ppmdiff: ppmdiff.o a2plain.o uarray2.o
 	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS)
 
-40image: 40image.o compress_decompress.o uarray2b.o a2plain.o a2blocked.o \
+40image-6: 40image.o compress_decompress.o uarray2b.o a2plain.o a2blocked.o \
 		 uarray2.o trimPPM.o convert_comp_rgb.o block_unblock.o \
 		 DCT_transform.o bitpack.o pack_unpack.o read_write.o
 	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS)
